@@ -299,3 +299,185 @@ if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
 } else {
   ctx.clearRect(0, 0, innerWidth, innerHeight);
 }
+
+
+// -----------------------------
+// DIGITAL SIGNAL + UI SOUNDS
+// -----------------------------
+const SIGNAL_NAMESPACE = "FeralVortex.github.io";
+const SIGNAL_ACTION = "signal";
+const SIGNAL_KEY = "portfolio";
+const SIGNAL_STORAGE_KEY = "sadman-digital-signal-sent";
+
+const signalButton = document.getElementById("send-signal");
+const signalButtonText = document.getElementById("signal-button-text");
+const signalCount = document.getElementById("signal-count");
+const signalStatus = document.getElementById("signal-status");
+const signalCard = document.querySelector(".signal-card");
+
+// CounterAPI gives this static GitHub Pages site a shared global counter.
+const signalEndpoint =
+  `https://counterapi.com/api/${encodeURIComponent(SIGNAL_NAMESPACE)}/${encodeURIComponent(SIGNAL_ACTION)}/${encodeURIComponent(SIGNAL_KEY)}`;
+
+async function getSignalCount() {
+  try {
+    const response = await fetch(`${signalEndpoint}?readOnly=true`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Counter unavailable");
+    const data = await response.json();
+    signalCount.textContent = Number(data.value || 0).toLocaleString();
+  } catch {
+    signalCount.textContent = "—";
+    signalStatus.textContent = "Signal count is temporarily unavailable.";
+  }
+}
+
+function setSignalAlreadySent() {
+  signalButton.disabled = true;
+  signalButtonText.textContent = "Signal Sent";
+}
+
+if (localStorage.getItem(SIGNAL_STORAGE_KEY) === "1") {
+  setSignalAlreadySent();
+}
+
+getSignalCount();
+
+// ---- Tiny synthesized UI sounds (no audio files needed) ----
+let audioContext = null;
+let audioUnlocked = false;
+let lastHoverTone = 0;
+
+function unlockAudio() {
+  if (!audioContext) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    audioContext = new AudioCtx();
+  }
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+
+  audioUnlocked = true;
+}
+
+// Browsers require an initial user interaction before sound can play.
+// After the first click/tap/key press, hover tones work normally.
+["pointerdown", "keydown", "touchstart"].forEach(eventName => {
+  window.addEventListener(eventName, unlockAudio, { once: true, passive: true });
+});
+
+function playTone({
+  frequency = 560,
+  duration = 0.045,
+  volume = 0.018,
+  type = "sine",
+  glideTo = null
+} = {}) {
+  if (!audioUnlocked || !audioContext) return;
+
+  const now = audioContext.currentTime;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, now);
+
+  if (glideTo) {
+    oscillator.frequency.exponentialRampToValueAtTime(glideTo, now + duration);
+  }
+
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(volume, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+
+  oscillator.start(now);
+  oscillator.stop(now + duration + 0.01);
+}
+
+function playHoverSignal() {
+  const now = performance.now();
+  if (now - lastHoverTone < 90) return;
+  lastHoverTone = now;
+
+  playTone({
+    frequency: 720,
+    glideTo: 920,
+    duration: 0.038,
+    volume: 0.012,
+    type: "sine"
+  });
+}
+
+function playTransmitSignal() {
+  if (!audioUnlocked || !audioContext) return;
+
+  playTone({
+    frequency: 420,
+    glideTo: 760,
+    duration: 0.12,
+    volume: 0.028,
+    type: "sine"
+  });
+
+  setTimeout(() => {
+    playTone({
+      frequency: 760,
+      glideTo: 1180,
+      duration: 0.15,
+      volume: 0.022,
+      type: "sine"
+    });
+  }, 85);
+}
+
+// Apply the subtle hover chirp to clickable UI controls.
+// Excludes ordinary body text links so the sound stays tasteful.
+const soundTargets = document.querySelectorAll(
+  "button, .btn, .socials a, .desktop-nav a, .side-menu nav a, footer a"
+);
+
+soundTargets.forEach(element => {
+  element.addEventListener("pointerenter", playHoverSignal, { passive: true });
+});
+
+signalButton.addEventListener("click", async () => {
+  unlockAudio();
+
+  if (localStorage.getItem(SIGNAL_STORAGE_KEY) === "1") {
+    setSignalAlreadySent();
+    playHoverSignal();
+    return;
+  }
+
+  signalButton.disabled = true;
+  signalButtonText.textContent = "Transmitting…";
+  signalStatus.textContent = "";
+  signalCard.classList.remove("transmitting");
+  void signalCard.offsetWidth;
+  signalCard.classList.add("transmitting");
+
+  playTransmitSignal();
+
+  try {
+    const response = await fetch(signalEndpoint, { cache: "no-store" });
+    if (!response.ok) throw new Error("Signal failed");
+
+    const data = await response.json();
+    const value = Number(data.value || 0);
+
+    signalCount.textContent = value.toLocaleString();
+    localStorage.setItem(SIGNAL_STORAGE_KEY, "1");
+    signalButtonText.textContent = "Signal Received ✓";
+    signalStatus.textContent = "Your signal is now part of the count.";
+  } catch {
+    signalButton.disabled = false;
+    signalButtonText.textContent = "Send a Signal";
+    signalStatus.textContent = "Transmission failed. Try again.";
+  }
+
+  setTimeout(() => signalCard.classList.remove("transmitting"), 1900);
+});
