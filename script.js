@@ -169,52 +169,77 @@ portraitZone.addEventListener("pointerleave", () => {
 });
 
 // Subtle animated particle + connection background
+// Optimized for smoother scrolling: fewer particles, fewer line checks,
+// 30 FPS cap, and animation pauses when the tab is hidden.
 const canvas = document.getElementById("bg-canvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", { alpha: true });
 let particles = [];
 let pointer = { x: -1000, y: -1000 };
+let lastFrame = 0;
+let animationFrameId = null;
+let isPageVisible = !document.hidden;
 
 function resizeCanvas() {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width = innerWidth * dpr;
-  canvas.height = innerHeight * dpr;
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  canvas.width = Math.floor(innerWidth * dpr);
+  canvas.height = Math.floor(innerHeight * dpr);
   canvas.style.width = `${innerWidth}px`;
   canvas.style.height = `${innerHeight}px`;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-  const count = Math.max(32, Math.min(72, Math.floor(innerWidth / 20)));
+  const count = Math.max(20, Math.min(42, Math.floor(innerWidth / 32)));
   particles = Array.from({ length: count }, () => ({
     x: Math.random() * innerWidth,
     y: Math.random() * innerHeight,
-    vx: (Math.random() - 0.5) * 0.22,
-    vy: (Math.random() - 0.5) * 0.22,
-    r: Math.random() * 1.4 + 0.5
+    vx: (Math.random() - 0.5) * 0.16,
+    vy: (Math.random() - 0.5) * 0.16,
+    r: Math.random() * 1.1 + 0.45
   }));
 }
 
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("pointermove", e => pointer = { x: e.clientX, y: e.clientY });
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(resizeCanvas, 120);
+}, { passive: true });
+
+window.addEventListener("pointermove", e => {
+  pointer.x = e.clientX;
+  pointer.y = e.clientY;
+}, { passive: true });
 
 function palette() {
   return root.dataset.theme === "light"
-    ? { dot: "rgba(95, 98, 255, .25)", line: "rgba(98, 111, 220, .08)" }
-    : { dot: "rgba(114, 123, 255, .46)", line: "rgba(95, 118, 255, .12)" };
+    ? { dot: "rgba(95, 98, 255, .20)", line: "rgba(98, 111, 220, .055)" }
+    : { dot: "rgba(114, 123, 255, .34)", line: "rgba(95, 118, 255, .075)" };
 }
 
-function animateParticles() {
+function drawParticles(time = 0) {
+  if (!isPageVisible) return;
+
+  // Cap animation at ~30fps instead of redrawing every browser frame.
+  if (time - lastFrame < 33) {
+    animationFrameId = requestAnimationFrame(drawParticles);
+    return;
+  }
+  lastFrame = time;
+
   ctx.clearRect(0, 0, innerWidth, innerHeight);
   const colors = palette();
+  const maxDistance = 95;
+  const maxDistanceSq = maxDistance * maxDistance;
 
   for (let i = 0; i < particles.length; i++) {
     const p = particles[i];
 
     const dxp = pointer.x - p.x;
     const dyp = pointer.y - p.y;
-    const distPointer = Math.hypot(dxp, dyp);
+    const distSqPointer = dxp * dxp + dyp * dyp;
 
-    if (distPointer < 160 && distPointer > 0) {
-      p.vx -= dxp / distPointer * 0.0025;
-      p.vy -= dyp / distPointer * 0.0025;
+    if (distSqPointer < 18000 && distSqPointer > 1) {
+      const invDist = 1 / Math.sqrt(distSqPointer);
+      p.vx -= dxp * invDist * 0.0014;
+      p.vy -= dyp * invDist * 0.0014;
     }
 
     p.vx *= .999;
@@ -232,24 +257,45 @@ function animateParticles() {
     ctx.fillStyle = colors.dot;
     ctx.fill();
 
-    for (let j = i + 1; j < particles.length; j++) {
+    // Only check a limited number of nearby candidates per particle.
+    const limit = Math.min(particles.length, i + 9);
+    for (let j = i + 1; j < limit; j++) {
       const q = particles[j];
-      const d = Math.hypot(p.x - q.x, p.y - q.y);
-      if (d < 115) {
-        ctx.globalAlpha = 1 - d / 115;
+      const dx = p.x - q.x;
+      const dy = p.y - q.y;
+      const dSq = dx * dx + dy * dy;
+
+      if (dSq < maxDistanceSq) {
+        const d = Math.sqrt(dSq);
+        ctx.globalAlpha = 1 - d / maxDistance;
         ctx.beginPath();
         ctx.moveTo(p.x, p.y);
         ctx.lineTo(q.x, q.y);
         ctx.strokeStyle = colors.line;
-        ctx.lineWidth = .8;
+        ctx.lineWidth = .7;
         ctx.stroke();
         ctx.globalAlpha = 1;
       }
     }
   }
 
-  requestAnimationFrame(animateParticles);
+  animationFrameId = requestAnimationFrame(drawParticles);
 }
 
+document.addEventListener("visibilitychange", () => {
+  isPageVisible = !document.hidden;
+  if (isPageVisible && !animationFrameId) {
+    animationFrameId = requestAnimationFrame(drawParticles);
+  } else if (!isPageVisible && animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+});
+
 resizeCanvas();
-animateParticles();
+
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  animationFrameId = requestAnimationFrame(drawParticles);
+} else {
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+}

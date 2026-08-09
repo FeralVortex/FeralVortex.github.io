@@ -132,7 +132,7 @@ button { font: inherit; }
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--header-bg);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(14px);
   box-shadow: 0 12px 40px rgba(0,0,0,.06);
 }
 
@@ -223,7 +223,7 @@ button { font: inherit; }
   border-radius: 20px;
   border: 1px solid var(--line);
   background: var(--bg-elevated);
-  backdrop-filter: blur(26px);
+  backdrop-filter: blur(16px);
   box-shadow: var(--shadow);
   transform: translateX(calc(100% + 40px));
   opacity: 0;
@@ -445,6 +445,7 @@ h1 {
 }
 
 .portrait-shell {
+  will-change: transform;
   position: relative;
   z-index: 4;
   width: min(390px, 72vw);
@@ -577,7 +578,7 @@ h1 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--card);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
 }
 
@@ -837,5 +838,21 @@ code {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: .01ms !important;
+  }
+}
+
+
+/* Performance tuning */
+.aurora { will-change: transform; }
+.reveal { will-change: transform, opacity; }
+
+@media (max-width: 1100px) {
+  .aurora { animation: none; opacity: .08; }
+}
+
+@media (max-width: 760px) {
+  #bg-canvas { opacity: .45; }
+  .glass-card, .skill-card, .contact-card, .site-header, .side-menu {
+    backdrop-filter: none;
   }
 }
