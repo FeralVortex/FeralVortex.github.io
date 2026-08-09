@@ -591,9 +591,12 @@ h1 {
 }
 
 .hover-card:hover {
-  transform: translateY(-7px) scale(1.012);
-  border-color: rgba(101, 119, 255, .32);
-  box-shadow: 0 24px 55px rgba(55, 68, 130, .14);
+  transform: translateY(-10px) scale(1.025);
+  border-color: rgba(101, 119, 255, .5);
+  box-shadow:
+    0 28px 70px rgba(55, 68, 130, .22),
+    0 0 0 1px rgba(110, 130, 255, .10),
+    0 0 34px rgba(91, 140, 255, .10);
 }
 
 .tag-cloud {
@@ -659,8 +662,11 @@ h1 {
 }
 
 .project-card:hover {
-  transform: translateY(-7px);
-  border-color: rgba(94,120,255,.32);
+  transform: translateY(-10px) scale(1.02);
+  border-color: rgba(94,120,255,.48);
+  box-shadow:
+    0 28px 70px rgba(55, 68, 130, .20),
+    0 0 28px rgba(91, 140, 255, .10);
 }
 
 .project-thumb {
