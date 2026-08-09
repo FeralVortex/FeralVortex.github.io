@@ -1,0 +1,23 @@
+ONE-TIME SETUP FOR REAL VISITOR COUNT + DIGITAL SIGNALS + COMMENTS
+
+1. Go to https://supabase.com and create a free account/project.
+2. In your Supabase project, open SQL Editor.
+3. Open SUPABASE-SETUP.sql from this website folder.
+4. Copy all of it into the SQL Editor and click Run.
+5. In Supabase go to Project Settings / API (or Connect / API Keys depending on dashboard version).
+6. Copy:
+   - Project URL
+   - Publishable key (preferred) or legacy anon key
+7. Open config.js and replace:
+   PASTE_YOUR_SUPABASE_PROJECT_URL_HERE
+   PASTE_YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY_HERE
+8. Upload the updated website files to GitHub and commit.
+9. Wait for GitHub Pages deployment, then Ctrl+F5.
+
+IMPORTANT:
+- Never put a Supabase secret key or service_role key in config.js.
+- The publishable/anon key is intended for browser use with Row Level Security.
+- Visitor count is one per browser ID, so normal refreshes do not increase it.
+- Digital Signal count is the exact total number of signal rows.
+- One signal is allowed per browser ID.
+- The most recent 8 named signals/comments are shown publicly.

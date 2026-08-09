@@ -301,48 +301,10 @@ if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
 }
 
 
+
 // -----------------------------
 // DIGITAL SIGNAL + UI SOUNDS
 // -----------------------------
-const SIGNAL_NAMESPACE = "FeralVortex.github.io";
-const SIGNAL_ACTION = "signal";
-const SIGNAL_KEY = "portfolio";
-const SIGNAL_STORAGE_KEY = "sadman-digital-signal-sent";
-
-const signalButton = document.getElementById("send-signal");
-const signalButtonText = document.getElementById("signal-button-text");
-const signalCount = document.getElementById("signal-count");
-const signalStatus = document.getElementById("signal-status");
-const signalCard = document.querySelector(".signal-card");
-
-// CounterAPI gives this static GitHub Pages site a shared global counter.
-const signalEndpoint =
-  `https://counterapi.com/api/${encodeURIComponent(SIGNAL_NAMESPACE)}/${encodeURIComponent(SIGNAL_ACTION)}/${encodeURIComponent(SIGNAL_KEY)}`;
-
-async function getSignalCount() {
-  try {
-    const response = await fetch(`${signalEndpoint}?readOnly=true`, { cache: "no-store" });
-    if (!response.ok) throw new Error("Counter unavailable");
-    const data = await response.json();
-    signalCount.textContent = Number(data.value || 0).toLocaleString();
-  } catch {
-    signalCount.textContent = "—";
-    signalStatus.textContent = "Signal count is temporarily unavailable.";
-  }
-}
-
-function setSignalAlreadySent() {
-  signalButton.disabled = true;
-  signalButtonText.textContent = "Signal Sent";
-}
-
-if (localStorage.getItem(SIGNAL_STORAGE_KEY) === "1") {
-  setSignalAlreadySent();
-}
-
-getSignalCount();
-
-// ---- Tiny synthesized UI sounds (no audio files needed) ----
 let audioContext = null;
 let audioUnlocked = false;
 let lastHoverTone = 0;
@@ -353,16 +315,10 @@ function unlockAudio() {
     if (!AudioCtx) return;
     audioContext = new AudioCtx();
   }
-
-  if (audioContext.state === "suspended") {
-    audioContext.resume();
-  }
-
+  if (audioContext.state === "suspended") audioContext.resume();
   audioUnlocked = true;
 }
 
-// Browsers require an initial user interaction before sound can play.
-// After the first click/tap/key press, hover tones work normally.
 ["pointerdown", "keydown", "touchstart"].forEach(eventName => {
   window.addEventListener(eventName, unlockAudio, { once: true, passive: true });
 });
@@ -370,7 +326,7 @@ function unlockAudio() {
 function playTone({
   frequency = 560,
   duration = 0.045,
-  volume = 0.018,
+  volume = 0.038,
   type = "sine",
   glideTo = null
 } = {}) {
@@ -382,10 +338,7 @@ function playTone({
 
   oscillator.type = type;
   oscillator.frequency.setValueAtTime(frequency, now);
-
-  if (glideTo) {
-    oscillator.frequency.exponentialRampToValueAtTime(glideTo, now + duration);
-  }
+  if (glideTo) oscillator.frequency.exponentialRampToValueAtTime(glideTo, now + duration);
 
   gain.gain.setValueAtTime(0.0001, now);
   gain.gain.exponentialRampToValueAtTime(volume, now + 0.008);
@@ -393,7 +346,6 @@ function playTone({
 
   oscillator.connect(gain);
   gain.connect(audioContext.destination);
-
   oscillator.start(now);
   oscillator.stop(now + duration + 0.01);
 }
@@ -402,42 +354,25 @@ function playHoverSignal() {
   const now = performance.now();
   if (now - lastHoverTone < 90) return;
   lastHoverTone = now;
+  playTone({ frequency: 720, glideTo: 920, duration: 0.038, volume: 0.038 });
+}
 
-  playTone({
-    frequency: 720,
-    glideTo: 920,
-    duration: 0.038,
-    volume: 0.038,
-    type: "sine"
-  });
+function playCardHoverSignal() {
+  const now = performance.now();
+  if (now - lastHoverTone < 90) return;
+  lastHoverTone = now;
+  playTone({ frequency: 540, glideTo: 790, duration: 0.065, volume: 0.042 });
 }
 
 function playTransmitSignal() {
-  if (!audioUnlocked || !audioContext) return;
-
-  playTone({
-    frequency: 420,
-    glideTo: 760,
-    duration: 0.12,
-    volume: 0.065,
-    type: "sine"
-  });
-
+  playTone({ frequency: 420, glideTo: 760, duration: 0.12, volume: 0.065 });
   setTimeout(() => {
-    playTone({
-      frequency: 760,
-      glideTo: 1180,
-      duration: 0.15,
-      volume: 0.050,
-      type: "sine"
-    });
+    playTone({ frequency: 760, glideTo: 1180, duration: 0.15, volume: 0.050 });
   }, 85);
 }
 
-// Apply the subtle hover chirp to clickable UI controls.
-// Excludes ordinary body text links so the sound stays tasteful.
 const soundTargets = document.querySelectorAll(
-  "button, .btn, .socials a, .desktop-nav a, .side-menu nav a, footer a, .hover-card, .project-card, .signal-card"
+  "button, .btn, .socials a, .desktop-nav a, .side-menu nav a, footer a, .hover-card, .project-card, .signal-card, .visitor-box, .signal-entry"
 );
 
 soundTargets.forEach(element => {
@@ -445,98 +380,241 @@ soundTargets.forEach(element => {
     if (
       element.classList.contains("hover-card") ||
       element.classList.contains("project-card") ||
-      element.classList.contains("signal-card")
+      element.classList.contains("signal-card") ||
+      element.classList.contains("visitor-box") ||
+      element.classList.contains("signal-entry")
     ) {
-      const now = performance.now();
-      if (now - lastHoverTone < 90) return;
-      lastHoverTone = now;
-      playTone({
-        frequency: 540,
-        glideTo: 790,
-        duration: 0.065,
-        volume: 0.042,
-        type: "sine"
-      });
+      playCardHoverSignal();
     } else {
       playHoverSignal();
     }
   }, { passive: true });
 });
 
-signalButton.addEventListener("click", async () => {
+// -----------------------------
+// SUPABASE: VISITORS + SIGNALS
+// -----------------------------
+const visitorCountEl = document.getElementById("visitor-count");
+const signalCountEl = document.getElementById("signal-count");
+const signalForm = document.getElementById("signal-form");
+const signalButton = document.getElementById("send-signal");
+const signalButtonText = document.getElementById("signal-button-text");
+const signalStatus = document.getElementById("signal-status");
+const signalName = document.getElementById("signal-name");
+const signalComment = document.getElementById("signal-comment");
+const signalFeed = document.getElementById("signal-feed");
+const signalCard = document.querySelector(".signal-card");
+
+const VISITOR_ID_KEY = "sadman-portfolio-visitor-id";
+const SIGNAL_SENT_KEY = "sadman-digital-signal-sent-v2";
+
+function getVisitorId() {
+  let id = localStorage.getItem(VISITOR_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID ? crypto.randomUUID() :
+      `${Date.now()}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
+    localStorage.setItem(VISITOR_ID_KEY, id);
+  }
+  return id;
+}
+
+function escapeText(text = "") {
+  return String(text).replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[ch]));
+}
+
+function isSupabaseConfigured() {
+  const url = window.PORTFOLIO_SUPABASE_URL || "";
+  const key = window.PORTFOLIO_SUPABASE_KEY || "";
+  return url.startsWith("https://") &&
+    !url.includes("PASTE_YOUR_") &&
+    key.length > 20 &&
+    !key.includes("PASTE_YOUR_");
+}
+
+let db = null;
+
+if (isSupabaseConfigured() && window.supabase) {
+  db = window.supabase.createClient(
+    window.PORTFOLIO_SUPABASE_URL,
+    window.PORTFOLIO_SUPABASE_KEY
+  );
+}
+
+function setDatabaseUnavailable(message = "Counter setup is not finished yet.") {
+  if (visitorCountEl) visitorCountEl.textContent = "—";
+  if (signalCountEl) signalCountEl.textContent = "—";
+  if (signalStatus) signalStatus.textContent = message;
+}
+
+async function registerVisitor() {
+  if (!db) return setDatabaseUnavailable();
+
+  const visitorId = getVisitorId();
+
+  // Unique visitor_id in the database means refreshes do not inflate the count.
+  await db.from("portfolio_visitors").upsert(
+    { visitor_id: visitorId },
+    { onConflict: "visitor_id", ignoreDuplicates: true }
+  );
+
+  const { count, error } = await db
+    .from("portfolio_visitors")
+    .select("*", { count: "exact", head: true });
+
+  if (error) throw error;
+  visitorCountEl.textContent = Number(count || 0).toLocaleString();
+}
+
+async function loadSignalCount() {
+  if (!db) return;
+
+  const { count, error } = await db
+    .from("portfolio_signals")
+    .select("*", { count: "exact", head: true });
+
+  if (error) throw error;
+  signalCountEl.textContent = Number(count || 0).toLocaleString();
+}
+
+function formatSignalTime(value) {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    }).format(new Date(value));
+  } catch {
+    return "";
+  }
+}
+
+async function loadSignalFeed() {
+  if (!db) return;
+
+  const { data, error } = await db
+    .from("portfolio_signals")
+    .select("name, comment, created_at")
+    .not("name", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(8);
+
+  if (error) throw error;
+
+  if (!data || !data.length) {
+    signalFeed.innerHTML = '<div class="signal-feed-empty">No public signals yet.</div>';
+    return;
+  }
+
+  signalFeed.innerHTML = data.map(item => `
+    <article class="signal-entry">
+      <div class="signal-entry-head">
+        <span class="signal-entry-name">${escapeText(item.name || "Anonymous")}</span>
+        <span class="signal-entry-time">${escapeText(formatSignalTime(item.created_at))}</span>
+      </div>
+      ${item.comment ? `<p>${escapeText(item.comment)}</p>` : ""}
+    </article>
+  `).join("");
+
+  signalFeed.querySelectorAll(".signal-entry").forEach(entry => {
+    entry.addEventListener("pointerenter", playCardHoverSignal, { passive: true });
+  });
+}
+
+function setSignalAlreadySent() {
+  signalButton.disabled = true;
+  signalButtonText.textContent = "Signal Sent ✓";
+  signalName.disabled = true;
+  signalComment.disabled = true;
+}
+
+if (localStorage.getItem(SIGNAL_SENT_KEY) === "1") {
+  setSignalAlreadySent();
+}
+
+async function initializeCounters() {
+  if (!db) {
+    setDatabaseUnavailable();
+    return;
+  }
+
+  try {
+    await Promise.all([
+      registerVisitor(),
+      loadSignalCount(),
+      loadSignalFeed()
+    ]);
+  } catch (error) {
+    console.error("Portfolio database error:", error);
+    setDatabaseUnavailable("Live counts are temporarily unavailable.");
+  }
+}
+
+signalForm.addEventListener("submit", async event => {
+  event.preventDefault();
   unlockAudio();
 
-  if (localStorage.getItem(SIGNAL_STORAGE_KEY) === "1") {
+  if (!db) {
+    setDatabaseUnavailable("Digital Signals need the one-time database setup first.");
+    return;
+  }
+
+  if (localStorage.getItem(SIGNAL_SENT_KEY) === "1") {
     setSignalAlreadySent();
-    playHoverSignal();
+    return;
+  }
+
+  const name = signalName.value.trim();
+  const comment = signalComment.value.trim();
+
+  if (!name) {
+    signalStatus.textContent = "Enter your name before sending a signal.";
+    signalName.focus();
     return;
   }
 
   signalButton.disabled = true;
   signalButtonText.textContent = "Transmitting…";
   signalStatus.textContent = "";
+
   signalCard.classList.remove("transmitting");
   void signalCard.offsetWidth;
   signalCard.classList.add("transmitting");
-
   playTransmitSignal();
 
   try {
-    const response = await fetch(signalEndpoint, { cache: "no-store" });
-    if (!response.ok) throw new Error("Signal failed");
+    const { error } = await db.from("portfolio_signals").insert({
+      visitor_id: getVisitorId(),
+      name: name.slice(0, 40),
+      comment: comment ? comment.slice(0, 240) : null
+    });
 
-    const data = await response.json();
-    const value = Number(data.value || 0);
+    if (error) {
+      // 23505 = unique visitor_id: this browser already signaled.
+      if (error.code === "23505") {
+        localStorage.setItem(SIGNAL_SENT_KEY, "1");
+        setSignalAlreadySent();
+        signalStatus.textContent = "This browser has already sent a signal.";
+        await loadSignalCount();
+        return;
+      }
+      throw error;
+    }
 
-    signalCount.textContent = value.toLocaleString();
-    localStorage.setItem(SIGNAL_STORAGE_KEY, "1");
+    localStorage.setItem(SIGNAL_SENT_KEY, "1");
     signalButtonText.textContent = "Signal Received ✓";
-    signalStatus.textContent = "Your signal is now part of the count.";
-  } catch {
+    signalStatus.textContent = "Signal received. You are now part of the count.";
+
+    await Promise.all([loadSignalCount(), loadSignalFeed()]);
+  } catch (error) {
+    console.error("Signal error:", error);
     signalButton.disabled = false;
     signalButtonText.textContent = "Send a Signal";
     signalStatus.textContent = "Transmission failed. Try again.";
+  } finally {
+    setTimeout(() => signalCard.classList.remove("transmitting"), 1900);
   }
-
-  setTimeout(() => signalCard.classList.remove("transmitting"), 1900);
 });
 
-
-// -----------------------------
-// GLOBAL VISITOR COUNTER
-// -----------------------------
-// Counts each browser once, rather than increasing on every refresh.
-const VISITOR_NAMESPACE = "FeralVortex.github.io";
-const VISITOR_ACTION = "visitors";
-const VISITOR_KEY = "portfolio";
-const VISITOR_STORAGE_KEY = "sadman-portfolio-visitor-counted";
-
-const visitorCountEl = document.getElementById("visitor-count");
-
-const visitorEndpoint =
-  `https://counterapi.com/api/${encodeURIComponent(VISITOR_NAMESPACE)}/${encodeURIComponent(VISITOR_ACTION)}/${encodeURIComponent(VISITOR_KEY)}`;
-
-async function loadVisitorCount() {
-  if (!visitorCountEl) return;
-
-  try {
-    const alreadyCounted = localStorage.getItem(VISITOR_STORAGE_KEY) === "1";
-    const url = alreadyCounted
-      ? `${visitorEndpoint}?readOnly=true`
-      : visitorEndpoint;
-
-    const response = await fetch(url, { cache: "no-store" });
-    if (!response.ok) throw new Error("Visitor counter unavailable");
-
-    const data = await response.json();
-    visitorCountEl.textContent = Number(data.value || 0).toLocaleString();
-
-    if (!alreadyCounted) {
-      localStorage.setItem(VISITOR_STORAGE_KEY, "1");
-    }
-  } catch {
-    visitorCountEl.textContent = "—";
-  }
-}
-
-loadVisitorCount();
+initializeCounters();

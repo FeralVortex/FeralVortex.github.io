@@ -1090,3 +1090,113 @@ code {
     order: 2;
   }
 }
+
+
+/* Signal form + feed */
+.signal-form {
+  margin-top: 22px;
+  display: grid;
+  gap: 13px;
+}
+
+.signal-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.signal-form label small {
+  font-weight: 500;
+  opacity: .75;
+}
+
+.signal-form input,
+.signal-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px 14px;
+  color: var(--text);
+  background: rgba(110, 125, 255, .04);
+  outline: none;
+  font: inherit;
+  resize: vertical;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.signal-form input:focus,
+.signal-form textarea:focus {
+  border-color: rgba(91,140,255,.48);
+  box-shadow: 0 0 0 3px rgba(91,140,255,.08);
+}
+
+.signal-form input:hover,
+.signal-form textarea:hover {
+  border-color: rgba(101,119,255,.34);
+}
+
+.signal-feed-wrap {
+  width: min(920px, 100%);
+  margin-top: 22px;
+  padding: clamp(24px, 4vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.signal-feed-head h3 {
+  margin-bottom: 0;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+}
+
+.signal-feed {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.signal-entry {
+  padding: 15px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(105, 120, 255, .035);
+  transition: transform .2s ease, border-color .2s ease;
+}
+
+.signal-entry:hover {
+  transform: translateY(-3px);
+  border-color: rgba(101,119,255,.32);
+}
+
+.signal-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.signal-entry-name {
+  color: var(--text);
+  font-weight: 750;
+}
+
+.signal-entry-time {
+  color: var(--muted);
+  font-size: .75rem;
+  white-space: nowrap;
+}
+
+.signal-entry p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.signal-feed-empty {
+  color: var(--muted);
+  font-size: .9rem;
+}
