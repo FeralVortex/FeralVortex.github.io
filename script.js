@@ -611,7 +611,13 @@ signalForm.addEventListener("submit", async event => {
     console.error("Signal error:", error);
     signalButton.disabled = false;
     signalButtonText.textContent = "Send a Signal";
-    signalStatus.textContent = "Transmission failed. Try again.";
+
+    const safeMessage =
+      error?.message ||
+      error?.details ||
+      "Unknown database error";
+
+    signalStatus.textContent = `Transmission failed: ${safeMessage}`;
   } finally {
     setTimeout(() => signalCard.classList.remove("transmitting"), 1900);
   }
