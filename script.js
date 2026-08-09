@@ -407,7 +407,7 @@ function playHoverSignal() {
     frequency: 720,
     glideTo: 920,
     duration: 0.038,
-    volume: 0.012,
+    volume: 0.038,
     type: "sine"
   });
 }
@@ -419,7 +419,7 @@ function playTransmitSignal() {
     frequency: 420,
     glideTo: 760,
     duration: 0.12,
-    volume: 0.028,
+    volume: 0.065,
     type: "sine"
   });
 
@@ -428,7 +428,7 @@ function playTransmitSignal() {
       frequency: 760,
       glideTo: 1180,
       duration: 0.15,
-      volume: 0.022,
+      volume: 0.050,
       type: "sine"
     });
   }, 85);
@@ -437,11 +437,30 @@ function playTransmitSignal() {
 // Apply the subtle hover chirp to clickable UI controls.
 // Excludes ordinary body text links so the sound stays tasteful.
 const soundTargets = document.querySelectorAll(
-  "button, .btn, .socials a, .desktop-nav a, .side-menu nav a, footer a"
+  "button, .btn, .socials a, .desktop-nav a, .side-menu nav a, footer a, .hover-card, .project-card, .signal-card"
 );
 
 soundTargets.forEach(element => {
-  element.addEventListener("pointerenter", playHoverSignal, { passive: true });
+  element.addEventListener("pointerenter", () => {
+    if (
+      element.classList.contains("hover-card") ||
+      element.classList.contains("project-card") ||
+      element.classList.contains("signal-card")
+    ) {
+      const now = performance.now();
+      if (now - lastHoverTone < 90) return;
+      lastHoverTone = now;
+      playTone({
+        frequency: 540,
+        glideTo: 790,
+        duration: 0.065,
+        volume: 0.042,
+        type: "sine"
+      });
+    } else {
+      playHoverSignal();
+    }
+  }, { passive: true });
 });
 
 signalButton.addEventListener("click", async () => {
