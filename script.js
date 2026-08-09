@@ -500,3 +500,43 @@ signalButton.addEventListener("click", async () => {
 
   setTimeout(() => signalCard.classList.remove("transmitting"), 1900);
 });
+
+
+// -----------------------------
+// GLOBAL VISITOR COUNTER
+// -----------------------------
+// Counts each browser once, rather than increasing on every refresh.
+const VISITOR_NAMESPACE = "FeralVortex.github.io";
+const VISITOR_ACTION = "visitors";
+const VISITOR_KEY = "portfolio";
+const VISITOR_STORAGE_KEY = "sadman-portfolio-visitor-counted";
+
+const visitorCountEl = document.getElementById("visitor-count");
+
+const visitorEndpoint =
+  `https://counterapi.com/api/${encodeURIComponent(VISITOR_NAMESPACE)}/${encodeURIComponent(VISITOR_ACTION)}/${encodeURIComponent(VISITOR_KEY)}`;
+
+async function loadVisitorCount() {
+  if (!visitorCountEl) return;
+
+  try {
+    const alreadyCounted = localStorage.getItem(VISITOR_STORAGE_KEY) === "1";
+    const url = alreadyCounted
+      ? `${visitorEndpoint}?readOnly=true`
+      : visitorEndpoint;
+
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("Visitor counter unavailable");
+
+    const data = await response.json();
+    visitorCountEl.textContent = Number(data.value || 0).toLocaleString();
+
+    if (!alreadyCounted) {
+      localStorage.setItem(VISITOR_STORAGE_KEY, "1");
+    }
+  } catch {
+    visitorCountEl.textContent = "—";
+  }
+}
+
+loadVisitorCount();
