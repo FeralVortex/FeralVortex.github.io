@@ -354,14 +354,14 @@ function playHoverSignal() {
   const now = performance.now();
   if (now - lastHoverTone < 90) return;
   lastHoverTone = now;
-  playTone({ frequency: 720, glideTo: 920, duration: 0.038, volume: 0.038 });
+  playTone({ frequency: 720, glideTo: 920, duration: 0.055, volume: 0.085 });
 }
 
 function playCardHoverSignal() {
   const now = performance.now();
   if (now - lastHoverTone < 90) return;
   lastHoverTone = now;
-  playTone({ frequency: 540, glideTo: 790, duration: 0.065, volume: 0.042 });
+  playTone({ frequency: 540, glideTo: 790, duration: 0.080, volume: 0.090 });
 }
 
 function playTransmitSignal() {
