@@ -96,7 +96,7 @@
         </div>
 
         <div class="location-chip">Bangladesh</div>
-        <button class="ufo-launch" id="ufo-launch" type="button"><span>🛸</span> Spot the UFO</button>
+        <button class="ufo-launch" id="ufo-launch" type="button"><span class="ufo-launch-icon" aria-hidden="true">◈</span> Spot the UFO</button>
       </div>
 
       <div class="portrait-zone reveal" data-delay="100">
@@ -392,17 +392,48 @@
     <a href="#home">Back to top ↑</a>
   </footer>
 
+
   <div class="ufo-game" id="ufo-game" aria-hidden="true">
     <div class="ufo-game-panel" role="dialog" aria-modal="true" aria-labelledby="ufo-title">
       <div class="ufo-game-top">
-        <div><p class="kicker">MINI MISSION</p><h2 id="ufo-title">Spot the UFO</h2></div>
+        <div class="ufo-game-title-wrap">
+          <span class="ufo-mini-sprite" aria-hidden="true"></span>
+          <div>
+            <p class="ufo-pixel-label">MINI MISSION</p>
+            <h2 id="ufo-title">SPOT THE UFO</h2>
+            <p class="ufo-subtitle">Find the UFO hidden in the clouds!</p>
+          </div>
+        </div>
         <button class="ufo-close" id="ufo-close" type="button" aria-label="Close game">×</button>
       </div>
-      <div class="ufo-stats"><span>TIME <strong id="ufo-time">30</strong>s</span><span>SCORE <strong id="ufo-score">0</strong></span><span>BEST <strong id="ufo-best">0</strong></span></div>
+
+      <div class="ufo-stats" aria-live="polite">
+        <span>TIME <strong id="ufo-time">30</strong></span>
+        <span>SCORE <strong id="ufo-score">0</strong></span>
+        <span>BEST <strong id="ufo-best">0</strong></span>
+      </div>
+
       <div class="ufo-sky" id="ufo-sky">
-        <div class="ufo-stars" aria-hidden="true"></div>
-        <button class="ufo-target" id="ufo-target" type="button" aria-label="UFO">🛸</button>
-        <div class="ufo-start" id="ufo-start"><h3>30 seconds. How many can you find?</h3><p>The UFO moves after every hit and gets a little smaller.</p><button class="btn btn-primary" id="ufo-start-btn" type="button">Start Mission</button></div>
+        <button class="ufo-target" id="ufo-target" type="button" aria-label="Hidden UFO">
+          <span class="ufo-pixel-sprite" aria-hidden="true"></span>
+        </button>
+        <div class="ufo-cloud-cover" id="ufo-cloud-cover" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="ufo-start" id="ufo-start">
+          <div class="ufo-binoculars" aria-hidden="true">◉◉</div>
+          <h3>FIND THE UFO</h3>
+          <p>The UFO is hiding in the clouds.<br>Click the visible part when you spot it.</p>
+          <button class="ufo-start-btn" id="ufo-start-btn" type="button">▶ START GAME</button>
+        </div>
+      </div>
+
+      <div class="ufo-game-bottom">
+        <span class="ufo-mini-sprite" aria-hidden="true"></span>
+        <div>
+          <strong>CLICK THE UFO WHEN YOU SEE IT!</strong>
+          <span>YOU HAVE 30 SECONDS.</span>
+        </div>
       </div>
       <p class="ufo-result" id="ufo-result"></p>
     </div>

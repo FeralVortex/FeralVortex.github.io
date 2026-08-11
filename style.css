@@ -1200,214 +1200,79 @@ code {
   color: var(--muted);
   font-size: .9rem;
 }
-/* -----------------------------
-   SPOT THE UFO MINI GAME
------------------------------ */
 
+
+/* -----------------------------
+   SPOT THE UFO — PIXEL GAME
+----------------------------- */
 .ufo-launch {
   margin-top: 16px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 9px;
   width: max-content;
-  padding: 10px 15px;
-  border: 1px solid rgba(100, 216, 255, .28);
-  border-radius: 13px;
-  background: rgba(91, 140, 255, .08);
-  color: var(--text);
-  font-weight: 700;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(91, 220, 255, .35);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(14,30,56,.88), rgba(8,16,32,.9));
+  color: #8de9ff;
+  font: 700 .84rem/1 Space Grotesk, Inter, sans-serif;
+  letter-spacing: .04em;
   cursor: pointer;
-  box-shadow: 0 0 24px rgba(91, 140, 255, .08);
-  transition: .22s ease;
+  box-shadow: inset 0 0 0 1px rgba(106,142,205,.12), 0 0 20px rgba(61,196,255,.08);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
+.ufo-launch:hover { transform: translateY(-3px); border-color: #67ddff; box-shadow: 0 0 24px rgba(61,196,255,.18); }
+.ufo-launch-icon { color:#73f6e8; text-shadow:0 0 10px rgba(95,246,226,.75); }
 
-.ufo-launch:hover {
-  transform: translateY(-3px);
-  border-color: rgba(100, 216, 255, .6);
-  box-shadow: 0 0 28px rgba(91, 140, 255, .18);
-}
-
-.ufo-launch span {
-  filter: drop-shadow(0 0 7px rgba(100, 216, 255, .7));
-}
-
-.ufo-game {
-  position: fixed;
-  inset: 0;
-  z-index: 5000;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(3, 6, 15, .82);
-  backdrop-filter: blur(12px);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity .25s ease, visibility .25s ease;
-}
-
-.ufo-game.open {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.ufo-game-panel {
-  width: min(900px, 100%);
-  padding: 24px;
-  border: 1px solid rgba(100, 216, 255, .22);
-  border-radius: 24px;
-  background: #080d1a;
-  box-shadow: 0 30px 100px rgba(0, 0, 0, .55);
-}
-
-.ufo-game-top,
-.ufo-stats {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-}
-
-.ufo-game-top h2 {
-  margin: 0;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  color: #fff;
-}
-
-.ufo-close {
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(255, 255, 255, .12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, .05);
-  color: #fff;
-  font-size: 1.7rem;
-  cursor: pointer;
-}
-
-.ufo-stats {
-  margin: 18px 0 12px;
-  padding: 12px 15px;
-  border: 1px solid rgba(255, 255, 255, .08);
-  border-radius: 12px;
-  color: #9da9c5;
-  font-size: .78rem;
-  letter-spacing: .1em;
-}
-
-.ufo-stats strong {
-  color: #fff;
-  font-size: 1.05rem;
-}
-
-.ufo-sky {
-  position: relative;
-  overflow: hidden;
-  height: min(56vh, 470px);
-  min-height: 330px;
-  border-radius: 18px;
-  border: 1px solid rgba(100, 216, 255, .13);
-  background:
-    radial-gradient(circle at 75% 15%, rgba(79, 108, 191, .24), transparent 25%),
-    radial-gradient(circle at 20% 80%, rgba(83, 56, 145, .22), transparent 30%),
-    linear-gradient(#030712, #081126 60%, #10152a);
-}
-
-.ufo-stars {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(circle, #fff 0 1px, transparent 1.4px),
-    radial-gradient(circle, #7ddfff 0 1px, transparent 1.5px);
-  background-size: 47px 47px, 79px 79px;
-  background-position: 7px 12px, 31px 24px;
-  opacity: .65;
-}
-
-.ufo-target {
-  position: absolute;
-  z-index: 3;
-  display: none;
-  width: 52px;
-  height: 52px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  font-size: 38px;
-  line-height: 1;
-  cursor: crosshair;
-  filter: drop-shadow(0 0 8px rgba(100, 216, 255, .7));
-}
-
-.ufo-target:hover {
-  transform: scale(1.08);
-}
-
-.ufo-start {
-  position: absolute;
-  z-index: 5;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  text-align: center;
-  padding: 25px;
-  background: rgba(3, 7, 18, .55);
-}
-
-.ufo-start h3 {
-  margin-bottom: 8px;
-  color: #fff;
-}
-
-.ufo-start p {
-  color: #a9b2c7;
-  margin-bottom: 20px;
-}
-
-.ufo-result {
-  min-height: 1.4em;
-  margin: 14px 0 0;
-  text-align: center;
-  color: #a9b2c7;
-}
-
-.ufo-game.playing .ufo-start {
-  display: none;
-}
-
-.ufo-game.playing .ufo-target {
-  display: block;
-}
-
-body.ufo-game-open {
-  overflow: hidden;
-}
-
-@media (max-width: 1080px) {
-  .ufo-launch {
-    margin-inline: auto;
-  }
-}
-
-@media (max-width: 600px) {
-  .ufo-game {
-    padding: 8px;
-  }
-
-  .ufo-game-panel {
-    padding: 14px;
-  }
-
-  .ufo-sky {
-    min-height: 360px;
-  }
-
-  .ufo-stats {
-    font-size: .67rem;
-    padding: 10px;
-    gap: 8px;
-  }
-}
+.ufo-game { position: fixed; inset: 0; z-index: 5000; display: grid; place-items: center; padding: 18px; background: rgba(2, 5, 12, .9); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .2s ease, visibility .2s ease; }
+.ufo-game.open { opacity:1; visibility:visible; pointer-events:auto; }
+body.ufo-game-open { overflow:hidden; }
+.ufo-game-panel { width: min(1040px, 100%); overflow: hidden; border: 2px solid #354968; border-radius: 6px; background: #050b16; color: #eff8ff; box-shadow: 0 30px 110px rgba(0,0,0,.62), inset 0 0 0 2px rgba(111,148,204,.08); image-rendering: pixelated; }
+.ufo-game-top { min-height: 96px; padding: 14px 16px; display:flex; align-items:center; justify-content:space-between; gap:18px; border-bottom: 2px solid #263b5b; background: linear-gradient(180deg,#060d1a,#030914); }
+.ufo-game-title-wrap { display:flex; align-items:center; gap:14px; min-width:0; }
+.ufo-pixel-label { margin:0 0 3px; color:#4ce4df; font:700 .67rem/1 monospace; letter-spacing:.14em; }
+.ufo-game-top h2 { margin:0; color:#eafaff; font:700 clamp(1.25rem,3vw,2rem)/1 monospace; letter-spacing:.06em; }
+.ufo-subtitle { margin:6px 0 0; color:#72aaff; font:700 .75rem/1.2 monospace; }
+.ufo-close { width:46px; height:46px; flex:0 0 auto; border:2px solid #40506b; border-radius:4px; background:#070d18; color:#f5f5ef; font:700 1.7rem/1 monospace; cursor:pointer; box-shadow: inset -3px -3px 0 rgba(0,0,0,.35), inset 3px 3px 0 rgba(255,255,255,.04); }
+.ufo-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:2px solid #263b5b; background:#040a14; }
+.ufo-stats span { padding:10px 14px; text-align:center; color:#83aef2; font:700 .76rem/1.25 monospace; letter-spacing:.08em; border-right:1px solid #263b5b; }
+.ufo-stats span:last-child { border-right:0; }
+.ufo-stats strong { display:block; margin-top:3px; color:#fff; font:700 1.45rem/1 monospace; }
+.ufo-stats span:nth-child(2) strong { color:#37e738; }
+.ufo-stats span:nth-child(3) strong { color:#ffd34b; }
+.ufo-sky { position:relative; overflow:hidden; height:min(58vh,540px); min-height:360px; background:#07142a url('assets/ufo-night-pixel.png') center 48% / cover no-repeat; image-rendering: pixelated; cursor:crosshair; }
+.ufo-sky::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background:linear-gradient(180deg,rgba(1,5,15,.04),rgba(1,6,18,.1) 70%,rgba(0,4,12,.25)); }
+.ufo-target { position:absolute; z-index:4; display:none; width:74px; height:52px; padding:0; border:0; background:transparent; cursor:pointer; transform-origin:center; filter:drop-shadow(0 0 7px rgba(67,255,160,.42)); }
+.ufo-game.playing .ufo-target { display:block; }
+.ufo-pixel-sprite,.ufo-mini-sprite { position:relative; display:block; width:100%; height:100%; }
+.ufo-pixel-sprite::before { content:""; position:absolute; left:22%; top:7%; width:56%; height:35%; background:#3f9a9b; border:4px solid #263848; border-bottom:0; clip-path:polygon(25% 100%,38% 18%,62% 18%,78% 100%); box-shadow: inset 0 -7px 0 #286f78, inset 8px 0 0 rgba(134,241,233,.28); }
+.ufo-pixel-sprite::after { content:""; position:absolute; left:7%; top:38%; width:86%; height:34%; background:#8c9598; border:4px solid #26323a; clip-path:polygon(12% 18%,88% 18%,100% 56%,78% 84%,22% 84%,0 56%); box-shadow: inset 0 -8px 0 #4d585c, 0 9px 0 -4px #111a20; }
+.ufo-target::after { content:""; position:absolute; left:19%; top:67%; width:12%; height:10%; background:#4cff6b; box-shadow: 18px 0 0 #4cff6b,36px 0 0 #4cff6b,0 0 8px #4cff6b,18px 0 8px #4cff6b,36px 0 8px #4cff6b; }
+.ufo-mini-sprite { width:64px; height:38px; flex:0 0 auto; }
+.ufo-mini-sprite::before { content:""; position:absolute; left:19px; top:2px; width:28px; height:15px; background:#3e9ca0; border:3px solid #263848; clip-path:polygon(20% 100%,36% 0,64% 0,80% 100%); }
+.ufo-mini-sprite::after { content:""; position:absolute; left:6px; top:16px; width:52px; height:14px; background:#8b9495; border:3px solid #26323a; clip-path:polygon(10% 10%,90% 10%,100% 55%,75% 90%,25% 90%,0 55%); box-shadow:0 7px 0 -3px #3aff67; }
+.ufo-cloud-cover { position:absolute; z-index:6; display:none; width:120px; height:62px; pointer-events:auto; cursor:crosshair; image-rendering:pixelated; }
+.ufo-game.playing .ufo-cloud-cover { display:block; }
+.ufo-cloud-cover span { position:absolute; display:block; background:#344b73; border:4px solid #1b2b49; box-shadow: inset 0 -8px 0 #24385d, inset 0 7px 0 #6079a7; }
+.ufo-cloud-cover span:nth-child(1){left:0;bottom:5px;width:50px;height:28px;}
+.ufo-cloud-cover span:nth-child(2){left:28px;bottom:4px;width:56px;height:42px;}
+.ufo-cloud-cover span:nth-child(3){left:66px;bottom:6px;width:54px;height:31px;}
+.ufo-cloud-cover span:nth-child(4){left:45px;bottom:25px;width:34px;height:28px;}
+.ufo-cloud-cover span:nth-child(5){left:12px;bottom:23px;width:30px;height:20px;}
+.ufo-start { position:absolute; inset:0; z-index:9; display:grid; place-content:center; justify-items:center; text-align:center; padding:24px; background:rgba(2,7,17,.64); }
+.ufo-game.playing .ufo-start { display:none; }
+.ufo-binoculars { color:#5af0e7; font:700 1.6rem/1 monospace; letter-spacing:.05em; text-shadow:0 0 12px rgba(75,242,228,.45); }
+.ufo-start h3 { margin:12px 0 8px; color:#fff; font:700 1.4rem/1 monospace; letter-spacing:.08em; }
+.ufo-start p { margin:0 0 20px; color:#9bb9e8; font:700 .82rem/1.55 monospace; }
+.ufo-start-btn { padding:13px 22px; border:2px solid #55e2e4; border-radius:3px; background:#09202c; color:#70f0ed; font:700 .95rem/1 monospace; letter-spacing:.06em; cursor:pointer; box-shadow:inset -4px -4px 0 rgba(0,0,0,.22),0 0 14px rgba(65,226,226,.12); }
+.ufo-start-btn:hover { background:#0b2937; transform:translateY(-2px); }
+.ufo-game-bottom { display:flex; align-items:center; gap:14px; min-height:74px; padding:12px 16px; border-top:2px solid #263b5b; background:#040a14; }
+.ufo-game-bottom div { display:grid; gap:5px; }
+.ufo-game-bottom strong { color:#f4f8ff; font:700 .77rem/1 monospace; letter-spacing:.04em; }
+.ufo-game-bottom span { color:#6fa5ef; font:700 .72rem/1 monospace; }
+.ufo-result { min-height:0; margin:0; padding:0 16px; text-align:center; color:#78f4dd; background:#040a14; font:700 .72rem/1.4 monospace; }
+.ufo-result:not(:empty){ min-height:34px; padding-top:8px; }
+@media(max-width:1080px){ .ufo-launch{margin-inline:auto;} }
+@media(max-width:650px){ .ufo-game{padding:6px;} .ufo-game-panel{border-radius:4px;} .ufo-game-top{min-height:82px;padding:10px;} .ufo-mini-sprite{display:none;} .ufo-subtitle{display:none;} .ufo-close{width:40px;height:40px;} .ufo-stats span{padding:8px 5px;font-size:.66rem;} .ufo-stats strong{font-size:1.15rem;} .ufo-sky{height:62vh;min-height:390px;} .ufo-game-bottom{min-height:62px;padding:10px;} .ufo-game-bottom strong{font-size:.68rem;} .ufo-game-bottom span{font-size:.63rem;} }
