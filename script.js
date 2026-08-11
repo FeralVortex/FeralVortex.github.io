@@ -624,3 +624,260 @@ signalForm.addEventListener("submit", async event => {
 });
 
 initializeCounters();
+// -----------------------------
+// SPOT THE UFO MINI GAME
+// -----------------------------
+
+const ufoLaunch = document.getElementById("ufo-launch");
+const ufoGame = document.getElementById("ufo-game");
+const ufoClose = document.getElementById("ufo-close");
+const ufoSky = document.getElementById("ufo-sky");
+const ufoTarget = document.getElementById("ufo-target");
+const ufoStartBtn = document.getElementById("ufo-start-btn");
+const ufoTime = document.getElementById("ufo-time");
+const ufoScore = document.getElementById("ufo-score");
+const ufoBest = document.getElementById("ufo-best");
+const ufoResult = document.getElementById("ufo-result");
+const ufoStartScreen = document.getElementById("ufo-start");
+
+let ufoTimer = null;
+let ufoSeconds = 30;
+let ufoPoints = 0;
+
+const UFO_BEST_KEY = "sadman-ufo-best";
+
+function loadUfoBest() {
+  if (!ufoBest) return;
+
+  ufoBest.textContent = Number(
+    localStorage.getItem(UFO_BEST_KEY) || 0
+  );
+}
+
+function moveUfo() {
+  if (!ufoSky || !ufoTarget) return;
+
+  const rect = ufoSky.getBoundingClientRect();
+
+  // UFO becomes slightly smaller as the score increases.
+  const size = Math.max(30, 52 - ufoPoints * 1.15);
+  const padding = 12;
+
+  ufoTarget.style.fontSize = `${Math.max(22, size * 0.73)}px`;
+  ufoTarget.style.width = `${size}px`;
+  ufoTarget.style.height = `${size}px`;
+
+  const availableWidth = Math.max(
+    1,
+    rect.width - size - padding * 2
+  );
+
+  const availableHeight = Math.max(
+    1,
+    rect.height - size - padding * 2
+  );
+
+  const x = padding + Math.random() * availableWidth;
+  const y = padding + Math.random() * availableHeight;
+
+  ufoTarget.style.left = `${x}px`;
+  ufoTarget.style.top = `${y}px`;
+}
+
+function openUfoGame() {
+  if (!ufoGame) return;
+
+  ufoGame.classList.add("open");
+  ufoGame.setAttribute("aria-hidden", "false");
+
+  document.body.classList.add("ufo-game-open");
+
+  loadUfoBest();
+
+  if (ufoResult) {
+    ufoResult.textContent = "";
+  }
+
+  if (typeof playHoverSignal === "function") {
+    playHoverSignal();
+  }
+}
+
+function closeUfoGame() {
+  clearInterval(ufoTimer);
+  ufoTimer = null;
+
+  if (!ufoGame) return;
+
+  ufoGame.classList.remove("open", "playing");
+  ufoGame.setAttribute("aria-hidden", "true");
+
+  document.body.classList.remove("ufo-game-open");
+}
+
+function finishUfoGame() {
+  clearInterval(ufoTimer);
+  ufoTimer = null;
+
+  if (!ufoGame) return;
+
+  ufoGame.classList.remove("playing");
+
+  const oldBest = Number(
+    localStorage.getItem(UFO_BEST_KEY) || 0
+  );
+
+  const isNewBest = ufoPoints > oldBest;
+
+  if (isNewBest) {
+    localStorage.setItem(
+      UFO_BEST_KEY,
+      String(ufoPoints)
+    );
+  }
+
+  loadUfoBest();
+
+  if (ufoResult) {
+    ufoResult.textContent = isNewBest
+      ? `New high score: ${ufoPoints} UFOs found.`
+      : `Mission complete — ${ufoPoints} UFOs found.`;
+  }
+
+  if (ufoStartScreen) {
+    const title = ufoStartScreen.querySelector("h3");
+
+    if (title) {
+      title.textContent = "Mission complete. Go again?";
+    }
+  }
+
+  if (ufoStartBtn) {
+    ufoStartBtn.textContent = "Play Again";
+  }
+
+  if (typeof playTransmitSignal === "function") {
+    playTransmitSignal();
+  }
+}
+
+function startUfoGame() {
+  clearInterval(ufoTimer);
+
+  ufoSeconds = 30;
+  ufoPoints = 0;
+
+  if (ufoTime) {
+    ufoTime.textContent = ufoSeconds;
+  }
+
+  if (ufoScore) {
+    ufoScore.textContent = ufoPoints;
+  }
+
+  if (ufoResult) {
+    ufoResult.textContent = "";
+  }
+
+  if (ufoStartScreen) {
+    const title = ufoStartScreen.querySelector("h3");
+
+    if (title) {
+      title.textContent = "Find the UFO.";
+    }
+  }
+
+  if (ufoGame) {
+    ufoGame.classList.add("playing");
+  }
+
+  moveUfo();
+
+  ufoTimer = setInterval(() => {
+    ufoSeconds--;
+
+    if (ufoTime) {
+      ufoTime.textContent = ufoSeconds;
+    }
+
+    if (ufoSeconds <= 0) {
+      finishUfoGame();
+    }
+  }, 1000);
+}
+
+
+// Open game
+if (ufoLaunch) {
+  ufoLaunch.addEventListener("click", openUfoGame);
+}
+
+
+// Close game
+if (ufoClose) {
+  ufoClose.addEventListener("click", closeUfoGame);
+}
+
+
+// Start / Play Again
+if (ufoStartBtn) {
+  ufoStartBtn.addEventListener("click", startUfoGame);
+}
+
+
+// UFO clicked
+if (ufoTarget) {
+  ufoTarget.addEventListener("click", event => {
+    event.stopPropagation();
+
+    if (
+      !ufoGame ||
+      !ufoGame.classList.contains("playing")
+    ) {
+      return;
+    }
+
+    ufoPoints++;
+
+    if (ufoScore) {
+      ufoScore.textContent = ufoPoints;
+    }
+
+    if (typeof playTone === "function") {
+      playTone({
+        frequency: 880,
+        glideTo: 1250,
+        duration: 0.07,
+        volume: 0.06
+      });
+    }
+
+    moveUfo();
+  });
+}
+
+
+// Clicking outside the game window closes it
+if (ufoGame) {
+  ufoGame.addEventListener("click", event => {
+    if (event.target === ufoGame) {
+      closeUfoGame();
+    }
+  });
+}
+
+
+// ESC closes the game
+document.addEventListener("keydown", event => {
+  if (
+    event.key === "Escape" &&
+    ufoGame &&
+    ufoGame.classList.contains("open")
+  ) {
+    closeUfoGame();
+  }
+});
+
+
+// Load saved high score
+loadUfoBest();
