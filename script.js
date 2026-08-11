@@ -630,13 +630,16 @@ initializeCounters();
 // -----------------------------
 // SPOT THE UFO — PIXEL GAME
 // -----------------------------
+// -----------------------------
+// SPOT THE UFO — PIXEL GAME
+// STATIC CLOUD VERSION
+// -----------------------------
 
 const ufoLaunch = document.getElementById("ufo-launch");
 const ufoGame = document.getElementById("ufo-game");
 const ufoClose = document.getElementById("ufo-close");
 const ufoSky = document.getElementById("ufo-sky");
 const ufoTarget = document.getElementById("ufo-target");
-const ufoCloudCover = document.getElementById("ufo-cloud-cover");
 const ufoStart = document.getElementById("ufo-start");
 const ufoStartBtn = document.getElementById("ufo-start-btn");
 const ufoTime = document.getElementById("ufo-time");
@@ -650,95 +653,237 @@ let ufoTimer = null;
 let ufoSeconds = 30;
 let ufoPoints = 0;
 
+
 function loadUfoBest() {
-  if (ufoBest) {
-    ufoBest.textContent = Number(
-      localStorage.getItem(UFO_BEST_KEY) || 0
-    );
-  }
+  if (!ufoBest) return;
+
+  ufoBest.textContent = Number(
+    localStorage.getItem(UFO_BEST_KEY) || 0
+  );
 }
 
+
 function placeHiddenUfo() {
-  if (!ufoSky || !ufoTarget || !ufoCloudCover) return;
+  if (!ufoSky || !ufoTarget) return;
 
   const sky = ufoSky.getBoundingClientRect();
 
-  // UFO gets smaller as score increases
-  const size = Math.max(38, 74 - ufoPoints * 1.8);
+  // UFO gets gradually smaller as score increases
+  const size = Math.max(
+    38,
+    74 - ufoPoints * 1.65
+  );
 
   const ufoW = size;
   const ufoH = size * 0.70;
-  const margin = 28;
-
-  const x =
-    margin +
-    Math.random() *
-      Math.max(1, sky.width - ufoW - margin * 2);
-
-  const yMin = 40;
-  const yMax = Math.max(
-    yMin + 1,
-    sky.height - ufoH - 90
-  );
-
-  const y =
-    yMin +
-    Math.random() * (yMax - yMin);
 
   ufoTarget.style.width = `${ufoW}px`;
   ufoTarget.style.height = `${ufoH}px`;
-  ufoTarget.style.left = `${x}px`;
-  ufoTarget.style.top = `${y}px`;
 
-  // Randomly put cloud over left or right side of UFO
-  const side = Math.random() > 0.5 ? 1 : -1;
 
-  const cloudScale = Math.max(
-    0.58,
-    Math.min(1, size / 74)
+  /*
+    THESE POSITIONS MATCH THE FIXED CLOUDS.
+
+    IMPORTANT:
+    Nothing here moves a cloud.
+
+    Only the UFO position changes.
+  */
+
+  const hidingZones = [
+
+    // Top-left cloud
+    {
+      x: [7, 27],
+      y: [8, 27]
+    },
+
+    // Top-right cloud
+    {
+      x: [68, 87],
+      y: [12, 31]
+    },
+
+    // Middle-left cloud
+    {
+      x: [7, 27],
+      y: [44, 62]
+    },
+
+    // Middle-right cloud
+    {
+      x: [68, 87],
+      y: [47, 65]
+    },
+
+    // Bottom-middle cloud
+    {
+      x: [38, 62],
+      y: [68, 82]
+    }
+
+  ];
+
+
+  let x;
+  let y;
+
+
+  /*
+    82% of the time:
+    UFO appears around one of the fixed clouds.
+
+    18% of the time:
+    UFO appears in clearer sky.
+  */
+
+  const hideNearCloud =
+    Math.random() < 0.82;
+
+
+  if (hideNearCloud) {
+
+    const randomZone =
+      hidingZones[
+        Math.floor(
+          Math.random() *
+          hidingZones.length
+        )
+      ];
+
+
+    const xPercent =
+      randomZone.x[0] +
+      Math.random() *
+      (
+        randomZone.x[1] -
+        randomZone.x[0]
+      );
+
+
+    const yPercent =
+      randomZone.y[0] +
+      Math.random() *
+      (
+        randomZone.y[1] -
+        randomZone.y[0]
+      );
+
+
+    x =
+      sky.width *
+      (xPercent / 100);
+
+
+    y =
+      sky.height *
+      (yPercent / 100);
+
+
+    // Small variation so UFO does not
+    // appear in exactly the same spot.
+    x +=
+      (Math.random() - 0.5) *
+      ufoW *
+      0.55;
+
+
+    y +=
+      (Math.random() - 0.5) *
+      ufoH *
+      0.40;
+
+  }
+
+  else {
+
+    // Easier round — UFO in open sky
+
+    const marginX =
+      Math.max(
+        30,
+        ufoW
+      );
+
+
+    const marginY =
+      Math.max(
+        35,
+        ufoH
+      );
+
+
+    x =
+      marginX +
+      Math.random() *
+      Math.max(
+        1,
+        sky.width -
+        ufoW -
+        marginX * 2
+      );
+
+
+    y =
+      marginY +
+      Math.random() *
+      Math.max(
+        1,
+        sky.height -
+        ufoH -
+        marginY * 2
+      );
+
+  }
+
+
+  // Keep UFO inside game area
+
+  x = Math.max(
+    5,
+    Math.min(
+      sky.width -
+      ufoW -
+      5,
+      x
+    )
   );
 
-  const cloudW = 120 * cloudScale;
-  const cloudH = 62 * cloudScale;
 
-  // Hide roughly 38–60% of UFO
-  const overlap =
-    ufoW * (0.38 + Math.random() * 0.22);
+  y = Math.max(
+    5,
+    Math.min(
+      sky.height -
+      ufoH -
+      5,
+      y
+    )
+  );
 
-  const cloudX =
-    side === 1
-      ? x + ufoW - overlap
-      : x - cloudW + overlap;
 
-  const cloudY =
-    y + ufoH * (0.28 + Math.random() * 0.22);
+  // ONLY THE UFO MOVES HERE
 
-  ufoCloudCover.style.width = `${cloudW}px`;
-  ufoCloudCover.style.height = `${cloudH}px`;
+  ufoTarget.style.left =
+    `${x}px`;
 
-  ufoCloudCover.style.left =
-    `${Math.max(
-      0,
-      Math.min(sky.width - cloudW, cloudX)
-    )}px`;
-
-  ufoCloudCover.style.top =
-    `${Math.max(
-      0,
-      Math.min(sky.height - cloudH, cloudY)
-    )}px`;
-
-  ufoCloudCover.style.transform =
-    side === 1 ? "scaleX(1)" : "scaleX(-1)";
+  ufoTarget.style.top =
+    `${y}px`;
 }
+
 
 function openUfoGame() {
   if (!ufoGame) return;
 
   ufoGame.classList.add("open");
-  ufoGame.setAttribute("aria-hidden", "false");
 
-  document.body.classList.add("ufo-game-open");
+  ufoGame.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  document.body.classList.add(
+    "ufo-game-open"
+  );
 
   loadUfoBest();
 
@@ -746,18 +891,25 @@ function openUfoGame() {
     ufoResult.textContent = "";
   }
 
-  if (typeof playHoverSignal === "function") {
+  if (
+    typeof playHoverSignal === "function"
+  ) {
     playHoverSignal();
   }
 }
 
+
 function closeUfoGame() {
   clearInterval(ufoTimer);
+
   ufoTimer = null;
 
   if (!ufoGame) return;
 
-  ufoGame.classList.remove("open", "playing");
+  ufoGame.classList.remove(
+    "open",
+    "playing"
+  );
 
   ufoGame.setAttribute(
     "aria-hidden",
@@ -769,19 +921,29 @@ function closeUfoGame() {
   );
 }
 
+
 function finishUfoGame() {
   clearInterval(ufoTimer);
+
   ufoTimer = null;
 
   if (!ufoGame) return;
 
-  ufoGame.classList.remove("playing");
-
-  const oldBest = Number(
-    localStorage.getItem(UFO_BEST_KEY) || 0
+  ufoGame.classList.remove(
+    "playing"
   );
 
-  const newBest = ufoPoints > oldBest;
+
+  const oldBest = Number(
+    localStorage.getItem(
+      UFO_BEST_KEY
+    ) || 0
+  );
+
+
+  const newBest =
+    ufoPoints > oldBest;
+
 
   if (newBest) {
     localStorage.setItem(
@@ -790,130 +952,187 @@ function finishUfoGame() {
     );
   }
 
+
   loadUfoBest();
 
+
   if (ufoResult) {
-    ufoResult.textContent = newBest
-      ? `NEW HIGH SCORE — ${ufoPoints} UFOs detected!`
-      : `MISSION COMPLETE — ${ufoPoints} UFOs detected.`;
+
+    ufoResult.textContent =
+      newBest
+        ? `NEW HIGH SCORE — ${ufoPoints} UFOs detected!`
+        : `MISSION COMPLETE — ${ufoPoints} UFOs detected.`;
+
   }
 
-  if (ufoStart) {
-    const h3 = ufoStart.querySelector("h3");
-    const p = ufoStart.querySelector("p");
 
-    if (h3) {
-      h3.textContent = "MISSION COMPLETE";
+  if (ufoStart) {
+
+    const heading =
+      ufoStart.querySelector("h3");
+
+    const text =
+      ufoStart.querySelector("p");
+
+
+    if (heading) {
+      heading.textContent =
+        "MISSION COMPLETE";
     }
 
-    if (p) {
-      p.innerHTML =
+
+    if (text) {
+      text.innerHTML =
         `You detected <strong>${ufoPoints}</strong> UFOs.<br>` +
         `Can you beat your score?`;
     }
+
   }
+
 
   if (ufoStartBtn) {
     ufoStartBtn.textContent =
       "▶ PLAY AGAIN";
   }
 
+
   if (
-    typeof playTransmitSignal === "function"
+    typeof playTransmitSignal ===
+    "function"
   ) {
     playTransmitSignal();
   }
 }
 
+
 function startUfoGame() {
+
   clearInterval(ufoTimer);
 
+
   ufoSeconds = 30;
+
   ufoPoints = 0;
 
+
   if (ufoTime) {
-    ufoTime.textContent = ufoSeconds;
+    ufoTime.textContent =
+      ufoSeconds;
   }
 
+
   if (ufoScore) {
-    ufoScore.textContent = ufoPoints;
+    ufoScore.textContent =
+      ufoPoints;
   }
+
 
   if (ufoResult) {
     ufoResult.textContent = "";
   }
 
+
   if (ufoGame) {
-    ufoGame.classList.add("playing");
+    ufoGame.classList.add(
+      "playing"
+    );
   }
+
 
   placeHiddenUfo();
 
-  ufoTimer = setInterval(() => {
-    ufoSeconds -= 1;
 
-    if (ufoTime) {
-      ufoTime.textContent = ufoSeconds;
-    }
+  ufoTimer =
+    setInterval(() => {
 
-    if (ufoSeconds <= 0) {
-      finishUfoGame();
-    }
-  }, 1000);
+      ufoSeconds -= 1;
+
+
+      if (ufoTime) {
+        ufoTime.textContent =
+          ufoSeconds;
+      }
+
+
+      if (ufoSeconds <= 0) {
+        finishUfoGame();
+      }
+
+    }, 1000);
 }
 
 
 // OPEN GAME
+
 if (ufoLaunch) {
+
   ufoLaunch.addEventListener(
     "click",
     openUfoGame
   );
+
 }
 
 
 // CLOSE GAME
+
 if (ufoClose) {
+
   ufoClose.addEventListener(
     "click",
     closeUfoGame
   );
+
 }
 
 
 // START / PLAY AGAIN
+
 if (ufoStartBtn) {
+
   ufoStartBtn.addEventListener(
     "click",
     startUfoGame
   );
+
 }
 
 
-// PLAYER FOUND UFO
+// UFO FOUND
+
 if (ufoTarget) {
+
   ufoTarget.addEventListener(
     "click",
     event => {
 
       event.stopPropagation();
 
+
       if (
         !ufoGame ||
-        !ufoGame.classList.contains("playing")
+        !ufoGame.classList.contains(
+          "playing"
+        )
       ) {
         return;
       }
 
+
       ufoPoints += 1;
 
+
       if (ufoScore) {
-        ufoScore.textContent = ufoPoints;
+        ufoScore.textContent =
+          ufoPoints;
       }
 
+
       if (
-        typeof playTone === "function"
+        typeof playTone ===
+        "function"
       ) {
+
         playTone({
           frequency: 830,
           glideTo: 1320,
@@ -921,52 +1140,45 @@ if (ufoTarget) {
           volume: 0.065,
           type: "square"
         });
+
       }
+
+
+      /*
+        Move ONLY the UFO after
+        successful detection.
+      */
 
       placeHiddenUfo();
+
     }
   );
+
 }
 
 
-// CLOUD WAS CLICKED — NO POINT
-if (ufoCloudCover) {
-  ufoCloudCover.addEventListener(
-    "click",
-    event => {
+// CLICK OUTSIDE GAME = CLOSE
 
-      event.stopPropagation();
-
-      if (
-        typeof playTone === "function"
-      ) {
-        playTone({
-          frequency: 150,
-          duration: 0.035,
-          volume: 0.018,
-          type: "square"
-        });
-      }
-    }
-  );
-}
-
-
-// CLICKING OUTSIDE WINDOW CLOSES GAME
 if (ufoGame) {
+
   ufoGame.addEventListener(
     "click",
     event => {
 
-      if (event.target === ufoGame) {
+      if (
+        event.target === ufoGame
+      ) {
         closeUfoGame();
       }
+
     }
   );
+
 }
 
 
-// ESC CLOSES GAME
+// ESC = CLOSE
+
 document.addEventListener(
   "keydown",
   event => {
@@ -974,29 +1186,40 @@ document.addEventListener(
     if (
       event.key === "Escape" &&
       ufoGame &&
-      ufoGame.classList.contains("open")
+      ufoGame.classList.contains(
+        "open"
+      )
     ) {
       closeUfoGame();
     }
+
   }
 );
 
 
-// KEEP UFO POSITION VALID AFTER RESIZING
+// Reposition UFO if screen size changes.
+// Clouds remain fixed by CSS.
+
 window.addEventListener(
   "resize",
   () => {
 
     if (
       ufoGame &&
-      ufoGame.classList.contains("playing")
+      ufoGame.classList.contains(
+        "playing"
+      )
     ) {
       placeHiddenUfo();
     }
+
   },
-  { passive: true }
+  {
+    passive: true
+  }
 );
 
 
-// LOAD SAVED HIGH SCORE
+// Load high score
+
 loadUfoBest();
