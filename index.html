@@ -96,6 +96,7 @@
         </div>
 
         <div class="location-chip">Bangladesh</div>
+        <button class="ufo-launch" id="ufo-launch" type="button"><span>🛸</span> Spot the UFO</button>
       </div>
 
       <div class="portrait-zone reveal" data-delay="100">
@@ -390,6 +391,22 @@
     </div>
     <a href="#home">Back to top ↑</a>
   </footer>
+
+  <div class="ufo-game" id="ufo-game" aria-hidden="true">
+    <div class="ufo-game-panel" role="dialog" aria-modal="true" aria-labelledby="ufo-title">
+      <div class="ufo-game-top">
+        <div><p class="kicker">MINI MISSION</p><h2 id="ufo-title">Spot the UFO</h2></div>
+        <button class="ufo-close" id="ufo-close" type="button" aria-label="Close game">×</button>
+      </div>
+      <div class="ufo-stats"><span>TIME <strong id="ufo-time">30</strong>s</span><span>SCORE <strong id="ufo-score">0</strong></span><span>BEST <strong id="ufo-best">0</strong></span></div>
+      <div class="ufo-sky" id="ufo-sky">
+        <div class="ufo-stars" aria-hidden="true"></div>
+        <button class="ufo-target" id="ufo-target" type="button" aria-label="UFO">🛸</button>
+        <div class="ufo-start" id="ufo-start"><h3>30 seconds. How many can you find?</h3><p>The UFO moves after every hit and gets a little smaller.</p><button class="btn btn-primary" id="ufo-start-btn" type="button">Start Mission</button></div>
+      </div>
+      <p class="ufo-result" id="ufo-result"></p>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
