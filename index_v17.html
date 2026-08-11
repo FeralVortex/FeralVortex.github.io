@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sadman Muhtasim — Computer Science Student and Forever A Learner. Interested in AI, machine learning, programming, astronomy, astrophotography and photography." />
+  <meta name="author" content="Sadman Muhtasim" />
+  <meta name="theme-color" content="#070b14" />
+  <meta property="og:title" content="Sadman Muhtasim | Portfolio" />
+  <meta property="og:description" content="Computer Science Student and Forever A Learner." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/profile.png" />
+  <title>Sadman Muhtasim | Portfolio</title>
+  <link rel="icon" href="assets/profile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="aurora aurora-one" aria-hidden="true"></div>
+  <div class="aurora aurora-two" aria-hidden="true"></div>
+
+  <div id="loader" aria-hidden="true">
+    <div class="loader-mark">SM</div>
+  </div>
+
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Go to home">
+      <span class="brand-mark">SM</span>
+      <span>Sadman Muhtasim</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Primary navigation">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#education">Education</a>
+      <a href="#achievements">Achievements</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle light and dark theme" title="Toggle theme">
+        <span id="theme-icon">☾</span>
+      </button>
+      <button class="icon-btn menu-btn" id="menu-toggle" aria-label="Open section menu" aria-controls="side-menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <aside id="side-menu" class="side-menu" aria-hidden="true">
+    <div class="side-menu-head">
+      <strong>Navigate</strong>
+      <button class="icon-btn" id="menu-close" aria-label="Close menu">×</button>
+    </div>
+    <nav aria-label="Section navigation">
+      <a href="#home">⌂ <span>Home</span></a>
+      <a href="#about">◉ <span>About</span></a>
+      <a href="#skills">⌘ <span>Skills</span></a>
+      <a href="#projects">▱ <span>Projects</span></a>
+      <a href="#education">◆ <span>Education</span></a>
+      <a href="#achievements">★ <span>Achievements</span></a>
+      <a href="#contact">✉ <span>Contact</span></a>
+    </nav>
+    <div class="side-theme">
+      <span>Theme</span>
+      <button id="side-theme-toggle" class="theme-pill" aria-label="Toggle theme"><span></span></button>
+    </div>
+  </aside>
+
+  <main>
+    <section id="home" class="hero section">
+      <div class="hero-copy reveal">
+        <div class="eyebrow">Hello, I'm <span>👋</span></div>
+        <h1>Sadman <span class="gradient-text">Muhtasim</span></h1>
+        <p class="headline">Computer Science Student <span>and</span> Forever A Learner</p>
+        <p class="hero-description">
+          I’m curious about artificial intelligence, programming and how technology can solve real problems.
+          Beyond code, I enjoy exploring the universe through astronomy and astrophotography, capturing moments through photography, and getting lost in a good single-player game.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="mailto:sadman.muhtasim26@gmail.com">Send Email <span>✉</span></a>
+          <a class="btn btn-secondary" href="assets/Sadman-Muhtasim-CV.pdf" download>Download CV <span>↓</span></a>
+        </div>
+
+        <div class="socials" aria-label="Social links">
+          <a href="https://github.com/FeralVortex" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">GH</a>
+          <a href="https://www.instagram.com/its_sageman?igsh=aXlyaWx1cWQ2Z2w3" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">IG</a>
+          <a href="https://x.com/Sadman_M26" target="_blank" rel="noopener noreferrer" aria-label="X" title="X">𝕏</a>
+        </div>
+
+        <div class="location-chip">Bangladesh</div>
+      </div>
+
+      <div class="portrait-zone reveal" data-delay="100">
+        <div class="orbit orbit-a"></div>
+        <div class="orbit orbit-b"></div>
+        <div class="portrait-shell" id="portrait-shell">
+          <img src="assets/profile.png" alt="Portrait of Sadman Muhtasim" />
+        </div>
+        <div class="hover-platform">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section content-section">
+      <div class="section-heading reveal">
+        <p class="kicker">01 / About</p>
+        <h2>Curious by default.</h2>
+      </div>
+      <div class="about-grid">
+        <article class="glass-card reveal hover-card">
+          <h3>About Me</h3>
+          <p>
+            I’m currently studying CAIE A Levels and building a stronger foundation in computing, mathematics and problem solving.
+            I’m especially interested in artificial intelligence, machine learning and programming, but I’m equally fascinated by astronomy, astrophotography and photography.
+          </p>
+          <p>
+            I like learning by experimenting, understanding how things work and improving them one iteration at a time.
+          </p>
+        </article>
+
+        <article class="glass-card reveal hover-card" data-delay="80">
+          <h3>Interests</h3>
+          <div class="tag-cloud">
+            <span>Artificial Intelligence</span>
+            <span>Machine Learning</span>
+            <span>Programming</span>
+            <span>Astrophotography</span>
+            <span>Photography</span>
+            <span>Astronomy</span>
+            <span>Aliens & Space</span>
+            <span>Single-player Gaming</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="languages" class="section content-section">
+      <div class="section-heading reveal">
+        <p class="kicker">Languages</p>
+        <h2>Languages Spoken</h2>
+      </div>
+      <div class="about-grid">
+        <article class="glass-card reveal hover-card">
+          <h3>Bangla</h3>
+          <p>Native</p>
+        </article>
+        <article class="glass-card reveal hover-card" data-delay="70">
+          <h3>English</h3>
+          <p>Fluent</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="skills" class="section content-section">
+      <div class="section-heading reveal">
+        <p class="kicker">02 / Skills</p>
+        <h2>What I’m building on.</h2>
+        <p>No fake percentages — just a clear snapshot of the areas I currently work with.</p>
+      </div>
+
+      <div class="skill-grid">
+        <article class="skill-card reveal hover-card">
+          <div class="skill-icon">Py</div>
+          <h3>Python</h3>
+          <p>Programming fundamentals, logic and problem solving.</p>
+        </article>
+        <article class="skill-card reveal hover-card" data-delay="50">
+          <div class="skill-icon">C++</div>
+          <h3>C++</h3>
+          <p>Basic syntax, control flow and introductory problem solving.</p>
+        </article>
+        <article class="skill-card reveal hover-card" data-delay="100">
+          <div class="skill-icon">AI</div>
+          <h3>AI Prompting Techniques</h3>
+          <p>Structuring prompts, iterating outputs and using AI tools effectively.</p>
+        </article>
+        <article class="skill-card reveal hover-card" data-delay="150">
+          <div class="skill-icon">∑</div>
+          <h3>Mathematics</h3>
+          <p>Intermediate-level mathematical reasoning and analytical thinking.</p>
+        </article>
+        <article class="skill-card reveal hover-card" data-delay="200">
+          <div class="skill-icon">◫</div>
+          <h3>Problem Solving</h3>
+          <p>Breaking larger problems into smaller, testable steps.</p>
+        </article>
+        <article class="skill-card reveal hover-card" data-delay="250">
+          <div class="skill-icon">Git</div>
+          <h3>Git & GitHub</h3>
+          <p>Version control, repositories and publishing projects online.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="projects" class="section content-section">
+      <div class="section-heading reveal">
+        <p class="kicker">03 / Projects</p>
+        <h2>Projects will live here.</h2>
+      </div>
+
+      <div id="project-grid" class="project-grid"></div>
+
+      <div id="project-empty" class="project-empty glass-card reveal">
+        <div class="empty-icon">⌁</div>
+        <h3>No projects published yet</h3>
+        <p>I’m still building. Real work will be added here as soon as it’s ready to share.</p>
+      </div>
+    </section>
+
+    <section id="education" class="section content-section">
+      <div class="section-heading reveal">
+        <p class="kicker">04 / Education</p>
+        <h2>Academic foundation.</h2>
+      </div>
+
+      <div class="timeline">
+        <article class="timeline-item reveal">
+          <span class="timeline-dot"></span>
+          <div class="glass-card hover-card">
+            <p class="mini-label">Current</p>
+            <h3>CAIE A Levels</h3>
+            <p>Physics · Computer Science · Mathematics</p>
+          </div>
+        </article>
+        <div class="timeline-item reveal" data-delay="70">
+          <div class="timeline-dot"></div>
+          <article class="glass-card education-card hover-card">
+            <p class="mini-label">Completed</p>
+            <h3>CAIE AS Level</h3>
+            <p>3As in AS Level</p>
+          </article>
+        </div>
+
+<article class="timeline-item reveal" data-delay="80">
+          <span class="timeline-dot"></span>
+          <div class="glass-card hover-card">
+            <p class="mini-label">Completed</p>
+            <h3>CAIE O Levels</h3>
+            <p>6A/A* in O Levels</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="achievements" class="section content-section">
+      <div class="section-heading reveal">
+        <p class="kicker">05 / Achievements</p>
+        <h2>Awards and Achievements</h2>
+      </div>
+
+      <div class="achievement-grid">
+        <article class="glass-card achievement-card reveal hover-card">
+          <span class="achievement-number">01</span>
+          <div>
+            <h3>International Computer Science Competition</h3>
+            <p>Participated in the International Computer Science Competition.</p>
+          </div>
+        </article>
+
+        <article class="glass-card achievement-card reveal hover-card" data-delay="70">
+          <span class="achievement-number">02</span>
+          <div>
+            <h3>Intra-School Coding Contests</h3>
+            <p>Participated in school-level coding competitions and problem-solving events.</p>
+          </div>
+        </article>
+
+        <article class="glass-card achievement-card reveal hover-card" data-delay="140">
+          <span class="achievement-number">03</span>
+          <div>
+            <h3>O Level High Achievement Award</h3>
+            <p>Recipient of the Daily Star and Prime Bank O Level award for high academic achievement.</p>
+          </div>
+        </article>
+
+        <article class="glass-card achievement-card reveal hover-card" data-delay="210">
+          <span class="achievement-number">04</span>
+          <div>
+            <h3>Advanced Python Programmer Certificate</h3>
+            <p>Earned through <a href="https://www.codingal.com/en-bd/" target="_blank" rel="noopener noreferrer">Codingal</a>.</p>
+          </div>
+        </article>
+
+        <article class="glass-card achievement-card reveal hover-card" data-delay="280">
+          <span class="achievement-number">05</span>
+          <div>
+            <h3>Breakthrough Junior Challenge</h3>
+            <p>Participated in the Breakthrough Junior Challenge.</p>
+          </div>
+        </article>
+
+        <article class="glass-card achievement-card reveal hover-card" data-delay="350">
+          <span class="achievement-number">06</span>
+          <div>
+            <h3>Start Writing Prompts Like a Pro</h3>
+            <p>Completed the course offered by Google through Coursera.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="signal" class="section signal-section">
+      <div class="signal-card reveal">
+        <div class="signal-radar" aria-hidden="true">
+          <span class="signal-core"></span>
+          <span class="signal-ring signal-ring-one"></span>
+          <span class="signal-ring signal-ring-two"></span>
+          <span class="signal-ring signal-ring-three"></span>
+        </div>
+
+        <div class="signal-content">
+          <p class="kicker">Digital Signal</p>
+          <h2>Leave a digital signal.</h2>
+          <p>
+            Send one signal from your browser. Add your name and a short message if you want your signal to leave a trace.
+          </p>
+
+          <form id="signal-form" class="signal-form">
+            <label>
+              <span>Name</span>
+              <input id="signal-name" name="name" type="text" maxlength="40" placeholder="Your name" autocomplete="name">
+            </label>
+
+            <label>
+              <span>Comment <small>(optional)</small></span>
+              <textarea id="signal-comment" name="comment" maxlength="240" rows="3" placeholder="Leave a short message..."></textarea>
+            </label>
+
+            <button class="btn btn-primary signal-button" id="send-signal" type="submit">
+              <span class="signal-button-dot"></span>
+              <span id="signal-button-text">Send a Signal</span>
+            </button>
+          </form>
+
+          <div class="signal-count-wrap" aria-live="polite">
+            <span id="signal-count">—</span>
+            <span>total signals received</span>
+          </div>
+
+          <p id="signal-status" class="signal-status" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="signal-feed-wrap reveal">
+        <div class="signal-feed-head">
+          <div>
+            <p class="kicker">Signal Log</p>
+            <h3>Recent signals</h3>
+          </div>
+        </div>
+        <div id="signal-feed" class="signal-feed">
+          <div class="signal-feed-empty">No public signals yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact-section">
+      <div class="contact-card reveal">
+        <p class="kicker">06 / Contact</p>
+        <h2>Want to reach me?</h2>
+        <p>Email is the simplest way. You can also find me on GitHub, Instagram and X.</p>
+        <div class="contact-actions">
+          <a class="btn btn-primary" href="mailto:sadman.muhtasim26@gmail.com">Send Email</a>
+          <button class="btn btn-secondary" id="copy-email" data-email="sadman.muhtasim26@gmail.com">Copy Email</button>
+        </div>
+        <p id="copy-status" class="copy-status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="year"></span> Sadman Muhtasim.</p>
+    <div class="visitor-box" aria-live="polite" title="Unique visitors">
+      <div class="visitor-box-icon">
+        <span class="visitor-dot"></span>
+      </div>
+      <div class="visitor-box-copy">
+        <span class="visitor-label">Visitors</span>
+        <strong id="visitor-count">—</strong>
+      </div>
+    </div>
+    <a href="#home">Back to top ↑</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
