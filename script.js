@@ -719,215 +719,71 @@ MOVE UFO
 
 function placeHiddenUfo() {
 
-  if (
-    !ufoSky ||
-    !ufoTarget
-  ) {
-    return;
-  }
+  if (!ufoSky || !ufoTarget) return;
 
+  const sky = ufoSky.getBoundingClientRect();
 
-  const sky =
-    ufoSky.getBoundingClientRect();
+  // Casual difficulty:
+  // UFO starts large and only gets slightly smaller.
+  const size = Math.max(
+    64,
+    88 - ufoPoints * 1
+  );
 
-
-  /*
-    CASUAL DIFFICULTY
-
-    Start around 86px wide.
-
-    It gets only slightly smaller.
-
-    Minimum is 62px,
-    so it never becomes frustrating.
-  */
-
-  const size =
-    Math.max(
-      62,
-      86 - ufoPoints * 1.1
-    );
-
-
-  const ufoWidth =
-    size;
-
-
-  const ufoHeight =
-    size * 0.74;
-
+  const ufoWidth = size;
+  const ufoHeight = size * 0.72;
 
   ufoTarget.style.width =
     `${ufoWidth}px`;
 
-
   ufoTarget.style.height =
     `${ufoHeight}px`;
 
+  const marginX = 25;
+  const marginY = 25;
 
-
-  /*
-    Safe margins prevent UFO
-    from going off-screen.
-  */
-
-  const marginX =
-    Math.max(
-      25,
-      ufoWidth * 0.35
-    );
-
-
-  const marginY =
-    Math.max(
-      25,
-      ufoHeight * 0.35
-    );
-
-
-
-  /*
-    CASUAL MODE:
-
-    About 65% of UFO positions
-    are in reasonably clear sky.
-
-    About 35% are near clouds.
-
-    Previously it was hidden
-    around 82% of the time,
-    which was too difficult.
-  */
-
-  const nearCloud =
-    Math.random() < 0.35;
-
-
-
-  /*
-    Fixed cloud locations.
-
-    CLOUDS NEVER MOVE.
-
-    These are only possible
-    UFO coordinates.
-  */
-
-  const cloudZones = [
-
-    {
-      x: [10, 25],
-      y: [15, 27]
-    },
-
-    {
-      x: [70, 84],
-      y: [17, 30]
-    },
-
-    {
-      x: [10, 25],
-      y: [49, 61]
-    },
-
-    {
-      x: [70, 84],
-      y: [50, 63]
-    },
-
-    {
-      x: [42, 58],
-      y: [68, 76]
-    }
-
-  ];
-
-
-
-  let x = 0;
-
-  let y = 0;
-
+  let x;
+  let y;
   let attempts = 0;
-
-
-
-  /*
-    Keep trying until the new position
-    is noticeably different from the
-    previous position.
-  */
 
   do {
 
-    if (nearCloud) {
+    x =
+      marginX +
+      Math.random() *
+      Math.max(
+        1,
+        sky.width -
+        ufoWidth -
+        marginX * 2
+      );
 
-      const zone =
-        cloudZones[
-          Math.floor(
-            Math.random() *
-            cloudZones.length
-          )
-        ];
+    y =
+      marginY +
+      Math.random() *
+      Math.max(
+        1,
+        sky.height -
+        ufoHeight -
+        marginY * 2
+      );
 
+    attempts++;
 
-      const xPercent =
-        zone.x[0] +
-        Math.random() *
-        (
-          zone.x[1] -
-          zone.x[0]
-        );
+  } while (
+    Math.hypot(
+      x - previousUfoX,
+      y - previousUfoY
+    ) < 150 &&
+    attempts < 40
+  );
 
+  previousUfoX = x;
+  previousUfoY = y;
 
-      const yPercent =
-        zone.y[0] +
-        Math.random() *
-        (
-          zone.y[1] -
-          zone.y[0]
-        );
-
-
-      x =
-        sky.width *
-        (xPercent / 100);
-
-
-      y =
-        sky.height *
-        (yPercent / 100);
-
-    }
-
-    else {
-
-      /*
-        Clear-sky location.
-      */
-
-      x =
-        marginX +
-        Math.random() *
-        Math.max(
-          1,
-          sky.width -
-          ufoWidth -
-          marginX * 2
-        );
-
-
-      y =
-        marginY +
-        Math.random() *
-        Math.max(
-          1,
-          sky.height -
-          ufoHeight -
-          marginY * 2
-        );
-
-    }
+  ufoTarget.style.transform =
+    `translate3d(${x}px, ${y}px, 0)`;
+}
 
 
 
