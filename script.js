@@ -634,380 +634,479 @@ initializeCounters();
 // SPOT THE UFO — PIXEL GAME
 // STATIC CLOUD VERSION
 // -----------------------------
+// -----------------------------
+// SPOT THE UFO — CASUAL VERSION
+// -----------------------------
 
-const ufoLaunch = document.getElementById("ufo-launch");
-const ufoGame = document.getElementById("ufo-game");
-const ufoClose = document.getElementById("ufo-close");
-const ufoSky = document.getElementById("ufo-sky");
-const ufoTarget = document.getElementById("ufo-target");
-const ufoStart = document.getElementById("ufo-start");
-const ufoStartBtn = document.getElementById("ufo-start-btn");
-const ufoTime = document.getElementById("ufo-time");
-const ufoScore = document.getElementById("ufo-score");
-const ufoBest = document.getElementById("ufo-best");
-const ufoResult = document.getElementById("ufo-result");
+const ufoLaunch =
+  document.getElementById("ufo-launch");
 
-const UFO_BEST_KEY = "sadman-ufo-best-v2";
+const ufoGame =
+  document.getElementById("ufo-game");
+
+const ufoClose =
+  document.getElementById("ufo-close");
+
+const ufoSky =
+  document.getElementById("ufo-sky");
+
+const ufoTarget =
+  document.getElementById("ufo-target");
+
+const ufoStart =
+  document.getElementById("ufo-start");
+
+const ufoStartBtn =
+  document.getElementById("ufo-start-btn");
+
+const ufoTime =
+  document.getElementById("ufo-time");
+
+const ufoScore =
+  document.getElementById("ufo-score");
+
+const ufoBest =
+  document.getElementById("ufo-best");
+
+const ufoResult =
+  document.getElementById("ufo-result");
+
+
+const UFO_BEST_KEY =
+  "sadman-ufo-best-v3";
+
 
 let ufoTimer = null;
+
 let ufoSeconds = 30;
+
 let ufoPoints = 0;
 
 
+/*
+Remember previous position.
+
+This prevents the UFO from randomly
+appearing almost exactly where it was.
+*/
+
+let previousUfoX = -9999;
+let previousUfoY = -9999;
+
+
+
 function loadUfoBest() {
+
   if (!ufoBest) return;
 
-  ufoBest.textContent = Number(
-    localStorage.getItem(UFO_BEST_KEY) || 0
-  );
+
+  ufoBest.textContent =
+    Number(
+      localStorage.getItem(
+        UFO_BEST_KEY
+      ) || 0
+    );
+
 }
 
 
+
+/*
+========================================
+MOVE UFO
+========================================
+*/
+
 function placeHiddenUfo() {
-  if (!ufoSky || !ufoTarget) return;
 
-  const sky = ufoSky.getBoundingClientRect();
+  if (
+    !ufoSky ||
+    !ufoTarget
+  ) {
+    return;
+  }
 
-  // UFO gets gradually smaller as score increases
-  const size = Math.max(
-    38,
-    74 - ufoPoints * 1.65
-  );
 
-  const ufoW = size;
-  const ufoH = size * 0.70;
-
-  ufoTarget.style.width = `${ufoW}px`;
-  ufoTarget.style.height = `${ufoH}px`;
+  const sky =
+    ufoSky.getBoundingClientRect();
 
 
   /*
-    THESE POSITIONS MATCH THE FIXED CLOUDS.
+    CASUAL DIFFICULTY
 
-    IMPORTANT:
-    Nothing here moves a cloud.
+    Start around 86px wide.
 
-    Only the UFO position changes.
+    It gets only slightly smaller.
+
+    Minimum is 62px,
+    so it never becomes frustrating.
   */
 
-  const hidingZones = [
+  const size =
+    Math.max(
+      62,
+      86 - ufoPoints * 1.1
+    );
 
-    // Top-left cloud
+
+  const ufoWidth =
+    size;
+
+
+  const ufoHeight =
+    size * 0.74;
+
+
+  ufoTarget.style.width =
+    `${ufoWidth}px`;
+
+
+  ufoTarget.style.height =
+    `${ufoHeight}px`;
+
+
+
+  /*
+    Safe margins prevent UFO
+    from going off-screen.
+  */
+
+  const marginX =
+    Math.max(
+      25,
+      ufoWidth * 0.35
+    );
+
+
+  const marginY =
+    Math.max(
+      25,
+      ufoHeight * 0.35
+    );
+
+
+
+  /*
+    CASUAL MODE:
+
+    About 65% of UFO positions
+    are in reasonably clear sky.
+
+    About 35% are near clouds.
+
+    Previously it was hidden
+    around 82% of the time,
+    which was too difficult.
+  */
+
+  const nearCloud =
+    Math.random() < 0.35;
+
+
+
+  /*
+    Fixed cloud locations.
+
+    CLOUDS NEVER MOVE.
+
+    These are only possible
+    UFO coordinates.
+  */
+
+  const cloudZones = [
+
     {
-      x: [7, 27],
-      y: [8, 27]
+      x: [10, 25],
+      y: [15, 27]
     },
 
-    // Top-right cloud
     {
-      x: [68, 87],
-      y: [12, 31]
+      x: [70, 84],
+      y: [17, 30]
     },
 
-    // Middle-left cloud
     {
-      x: [7, 27],
-      y: [44, 62]
+      x: [10, 25],
+      y: [49, 61]
     },
 
-    // Middle-right cloud
     {
-      x: [68, 87],
-      y: [47, 65]
+      x: [70, 84],
+      y: [50, 63]
     },
 
-    // Bottom-middle cloud
     {
-      x: [38, 62],
-      y: [68, 82]
+      x: [42, 58],
+      y: [68, 76]
     }
 
   ];
 
 
-  let x;
-  let y;
+
+  let x = 0;
+
+  let y = 0;
+
+  let attempts = 0;
+
 
 
   /*
-    82% of the time:
-    UFO appears around one of the fixed clouds.
-
-    18% of the time:
-    UFO appears in clearer sky.
+    Keep trying until the new position
+    is noticeably different from the
+    previous position.
   */
 
-  const hideNearCloud =
-    Math.random() < 0.82;
+  do {
+
+    if (nearCloud) {
+
+      const zone =
+        cloudZones[
+          Math.floor(
+            Math.random() *
+            cloudZones.length
+          )
+        ];
 
 
-  if (hideNearCloud) {
+      const xPercent =
+        zone.x[0] +
+        Math.random() *
+        (
+          zone.x[1] -
+          zone.x[0]
+        );
 
-    const randomZone =
-      hidingZones[
-        Math.floor(
-          Math.random() *
-          hidingZones.length
+
+      const yPercent =
+        zone.y[0] +
+        Math.random() *
+        (
+          zone.y[1] -
+          zone.y[0]
+        );
+
+
+      x =
+        sky.width *
+        (xPercent / 100);
+
+
+      y =
+        sky.height *
+        (yPercent / 100);
+
+    }
+
+    else {
+
+      /*
+        Clear-sky location.
+      */
+
+      x =
+        marginX +
+        Math.random() *
+        Math.max(
+          1,
+          sky.width -
+          ufoWidth -
+          marginX * 2
+        );
+
+
+      y =
+        marginY +
+        Math.random() *
+        Math.max(
+          1,
+          sky.height -
+          ufoHeight -
+          marginY * 2
+        );
+
+    }
+
+
+
+    /*
+      Keep UFO inside sky.
+    */
+
+    x =
+      Math.max(
+        8,
+        Math.min(
+          sky.width -
+          ufoWidth -
+          8,
+          x
         )
-      ];
-
-
-    const xPercent =
-      randomZone.x[0] +
-      Math.random() *
-      (
-        randomZone.x[1] -
-        randomZone.x[0]
-      );
-
-
-    const yPercent =
-      randomZone.y[0] +
-      Math.random() *
-      (
-        randomZone.y[1] -
-        randomZone.y[0]
-      );
-
-
-    x =
-      sky.width *
-      (xPercent / 100);
-
-
-    y =
-      sky.height *
-      (yPercent / 100);
-
-
-    // Small variation so UFO does not
-    // appear in exactly the same spot.
-    x +=
-      (Math.random() - 0.5) *
-      ufoW *
-      0.55;
-
-
-    y +=
-      (Math.random() - 0.5) *
-      ufoH *
-      0.40;
-
-  }
-
-  else {
-
-    // Easier round — UFO in open sky
-
-    const marginX =
-      Math.max(
-        30,
-        ufoW
-      );
-
-
-    const marginY =
-      Math.max(
-        35,
-        ufoH
-      );
-
-
-    x =
-      marginX +
-      Math.random() *
-      Math.max(
-        1,
-        sky.width -
-        ufoW -
-        marginX * 2
       );
 
 
     y =
-      marginY +
-      Math.random() *
       Math.max(
-        1,
-        sky.height -
-        ufoH -
-        marginY * 2
+        8,
+        Math.min(
+          sky.height -
+          ufoHeight -
+          8,
+          y
+        )
       );
+
+
+    attempts++;
 
   }
 
+  while (
 
-  // Keep UFO inside game area
+    /*
+      Force a noticeable jump.
 
-  x = Math.max(
-    5,
-    Math.min(
-      sky.width -
-      ufoW -
-      5,
-      x
-    )
+      It must move at least roughly
+      130px from its previous location.
+    */
+
+    Math.hypot(
+      x - previousUfoX,
+      y - previousUfoY
+    ) < 130
+
+    &&
+
+    attempts < 30
+
   );
 
 
-  y = Math.max(
-    5,
-    Math.min(
-      sky.height -
-      ufoH -
-      5,
-      y
-    )
-  );
+
+  previousUfoX = x;
+
+  previousUfoY = y;
 
 
-  // ONLY THE UFO MOVES HERE
 
-  ufoTarget.style.left =
-    `${x}px`;
+  /*
+    IMPORTANT:
 
-  ufoTarget.style.top =
-    `${y}px`;
+    Only this UFO element moves.
+
+    No cloud position is changed
+    anywhere in JavaScript.
+  */
+
+  ufoTarget.style.transform =
+    `translate3d(${x}px, ${y}px, 0)`;
+
 }
 
 
+
+/*
+========================================
+OPEN GAME
+========================================
+*/
+
 function openUfoGame() {
+
   if (!ufoGame) return;
 
-  ufoGame.classList.add("open");
+
+  ufoGame.classList.add(
+    "open"
+  );
+
 
   ufoGame.setAttribute(
     "aria-hidden",
     "false"
   );
 
+
   document.body.classList.add(
     "ufo-game-open"
   );
 
+
   loadUfoBest();
 
+
   if (ufoResult) {
+
     ufoResult.textContent = "";
+
   }
 
+
   if (
-    typeof playHoverSignal === "function"
+    typeof playHoverSignal ===
+    "function"
   ) {
+
     playHoverSignal();
+
   }
+
 }
 
 
+
+/*
+========================================
+CLOSE GAME
+========================================
+*/
+
 function closeUfoGame() {
-  clearInterval(ufoTimer);
+
+  clearInterval(
+    ufoTimer
+  );
+
 
   ufoTimer = null;
 
+
   if (!ufoGame) return;
+
 
   ufoGame.classList.remove(
     "open",
     "playing"
   );
 
+
   ufoGame.setAttribute(
     "aria-hidden",
     "true"
   );
 
+
   document.body.classList.remove(
     "ufo-game-open"
   );
+
 }
 
 
-function finishUfoGame() {
-  clearInterval(ufoTimer);
 
-  ufoTimer = null;
-
-  if (!ufoGame) return;
-
-  ufoGame.classList.remove(
-    "playing"
-  );
-
-
-  const oldBest = Number(
-    localStorage.getItem(
-      UFO_BEST_KEY
-    ) || 0
-  );
-
-
-  const newBest =
-    ufoPoints > oldBest;
-
-
-  if (newBest) {
-    localStorage.setItem(
-      UFO_BEST_KEY,
-      String(ufoPoints)
-    );
-  }
-
-
-  loadUfoBest();
-
-
-  if (ufoResult) {
-
-    ufoResult.textContent =
-      newBest
-        ? `NEW HIGH SCORE — ${ufoPoints} UFOs detected!`
-        : `MISSION COMPLETE — ${ufoPoints} UFOs detected.`;
-
-  }
-
-
-  if (ufoStart) {
-
-    const heading =
-      ufoStart.querySelector("h3");
-
-    const text =
-      ufoStart.querySelector("p");
-
-
-    if (heading) {
-      heading.textContent =
-        "MISSION COMPLETE";
-    }
-
-
-    if (text) {
-      text.innerHTML =
-        `You detected <strong>${ufoPoints}</strong> UFOs.<br>` +
-        `Can you beat your score?`;
-    }
-
-  }
-
-
-  if (ufoStartBtn) {
-    ufoStartBtn.textContent =
-      "▶ PLAY AGAIN";
-  }
-
-
-  if (
-    typeof playTransmitSignal ===
-    "function"
-  ) {
-    playTransmitSignal();
-  }
-}
-
+/*
+========================================
+START GAME
+========================================
+*/
 
 function startUfoGame() {
 
-  clearInterval(ufoTimer);
+  clearInterval(
+    ufoTimer
+  );
 
 
   ufoSeconds = 30;
@@ -1015,54 +1114,213 @@ function startUfoGame() {
   ufoPoints = 0;
 
 
+  previousUfoX = -9999;
+
+  previousUfoY = -9999;
+
+
   if (ufoTime) {
+
     ufoTime.textContent =
       ufoSeconds;
+
   }
 
 
   if (ufoScore) {
+
     ufoScore.textContent =
       ufoPoints;
+
   }
 
 
   if (ufoResult) {
+
     ufoResult.textContent = "";
+
   }
 
 
   if (ufoGame) {
+
     ufoGame.classList.add(
       "playing"
     );
+
   }
 
 
-  placeHiddenUfo();
+
+  /*
+    Wait one browser frame.
+
+    This guarantees the sky has
+    its real width/height before
+    positioning the UFO.
+  */
+
+  requestAnimationFrame(() => {
+
+    placeHiddenUfo();
+
+  });
+
 
 
   ufoTimer =
     setInterval(() => {
 
-      ufoSeconds -= 1;
+      ufoSeconds--;
 
 
       if (ufoTime) {
+
         ufoTime.textContent =
           ufoSeconds;
+
       }
 
 
-      if (ufoSeconds <= 0) {
+      if (
+        ufoSeconds <= 0
+      ) {
+
         finishUfoGame();
+
       }
 
     }, 1000);
+
 }
 
 
-// OPEN GAME
+
+/*
+========================================
+GAME OVER
+========================================
+*/
+
+function finishUfoGame() {
+
+  clearInterval(
+    ufoTimer
+  );
+
+
+  ufoTimer = null;
+
+
+  if (!ufoGame) return;
+
+
+  ufoGame.classList.remove(
+    "playing"
+  );
+
+
+  const oldBest =
+    Number(
+      localStorage.getItem(
+        UFO_BEST_KEY
+      ) || 0
+    );
+
+
+  const newBest =
+    ufoPoints > oldBest;
+
+
+
+  if (newBest) {
+
+    localStorage.setItem(
+      UFO_BEST_KEY,
+      String(ufoPoints)
+    );
+
+  }
+
+
+  loadUfoBest();
+
+
+
+  if (ufoResult) {
+
+    ufoResult.textContent =
+      newBest
+
+        ? `NEW HIGH SCORE — ${ufoPoints} UFOs detected!`
+
+        : `MISSION COMPLETE — ${ufoPoints} UFOs detected.`;
+
+  }
+
+
+
+  if (ufoStart) {
+
+    const heading =
+      ufoStart.querySelector(
+        "h3"
+      );
+
+
+    const text =
+      ufoStart.querySelector(
+        "p"
+      );
+
+
+    if (heading) {
+
+      heading.textContent =
+        "MISSION COMPLETE";
+
+    }
+
+
+    if (text) {
+
+      text.innerHTML =
+        `You detected <strong>${ufoPoints}</strong> UFOs.<br>` +
+        `Can you beat your score?`;
+
+    }
+
+  }
+
+
+
+  if (ufoStartBtn) {
+
+    ufoStartBtn.textContent =
+      "▶ PLAY AGAIN";
+
+  }
+
+
+
+  if (
+    typeof playTransmitSignal ===
+    "function"
+  ) {
+
+    playTransmitSignal();
+
+  }
+
+}
+
+
+
+/*
+========================================
+BUTTON EVENTS
+========================================
+*/
 
 if (ufoLaunch) {
 
@@ -1074,7 +1332,6 @@ if (ufoLaunch) {
 }
 
 
-// CLOSE GAME
 
 if (ufoClose) {
 
@@ -1086,7 +1343,6 @@ if (ufoClose) {
 }
 
 
-// START / PLAY AGAIN
 
 if (ufoStartBtn) {
 
@@ -1098,7 +1354,12 @@ if (ufoStartBtn) {
 }
 
 
-// UFO FOUND
+
+/*
+========================================
+UFO CLICKED
+========================================
+*/
 
 if (ufoTarget) {
 
@@ -1106,7 +1367,10 @@ if (ufoTarget) {
     "click",
     event => {
 
+      event.preventDefault();
+
       event.stopPropagation();
+
 
 
       if (
@@ -1115,17 +1379,24 @@ if (ufoTarget) {
           "playing"
         )
       ) {
+
         return;
+
       }
 
 
-      ufoPoints += 1;
+
+      ufoPoints++;
+
 
 
       if (ufoScore) {
+
         ufoScore.textContent =
           ufoPoints;
+
       }
+
 
 
       if (
@@ -1134,22 +1405,33 @@ if (ufoTarget) {
       ) {
 
         playTone({
-          frequency: 830,
-          glideTo: 1320,
-          duration: 0.075,
-          volume: 0.065,
+
+          frequency: 820,
+
+          glideTo: 1280,
+
+          duration: 0.08,
+
+          volume: 0.06,
+
           type: "square"
+
         });
 
       }
 
 
+
       /*
-        Move ONLY the UFO after
-        successful detection.
+        Force movement immediately
+        after each successful click.
       */
 
-      placeHiddenUfo();
+      requestAnimationFrame(() => {
+
+        placeHiddenUfo();
+
+      });
 
     }
   );
@@ -1157,7 +1439,12 @@ if (ufoTarget) {
 }
 
 
-// CLICK OUTSIDE GAME = CLOSE
+
+/*
+========================================
+ESC / OUTSIDE CLICK
+========================================
+*/
 
 if (ufoGame) {
 
@@ -1166,9 +1453,12 @@ if (ufoGame) {
     event => {
 
       if (
-        event.target === ufoGame
+        event.target ===
+        ufoGame
       ) {
+
         closeUfoGame();
+
       }
 
     }
@@ -1177,49 +1467,73 @@ if (ufoGame) {
 }
 
 
-// ESC = CLOSE
 
 document.addEventListener(
   "keydown",
   event => {
 
     if (
-      event.key === "Escape" &&
-      ufoGame &&
+      event.key ===
+        "Escape"
+
+      &&
+
+      ufoGame
+
+      &&
+
       ufoGame.classList.contains(
         "open"
       )
     ) {
+
       closeUfoGame();
+
     }
 
   }
 );
 
 
-// Reposition UFO if screen size changes.
-// Clouds remain fixed by CSS.
+
+/*
+========================================
+SCREEN RESIZE
+========================================
+*/
 
 window.addEventListener(
   "resize",
   () => {
 
     if (
-      ufoGame &&
+      ufoGame
+
+      &&
+
       ufoGame.classList.contains(
         "playing"
       )
     ) {
+
+      previousUfoX =
+        -9999;
+
+      previousUfoY =
+        -9999;
+
+
       placeHiddenUfo();
+
     }
 
   },
+
   {
     passive: true
   }
 );
 
 
-// Load high score
 
 loadUfoBest();
